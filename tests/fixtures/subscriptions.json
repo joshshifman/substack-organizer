@@ -1,0 +1,366 @@
+{
+ "subscriptions": [
+  {
+   "user_id": 1,
+   "id": 3000,
+   "membership_state": "subscribed",
+   "type": null,
+   "is_founding": false,
+   "publication_id": 1000
+  },
+  {
+   "user_id": 1,
+   "id": 3001,
+   "membership_state": "free_signup",
+   "type": null,
+   "is_founding": false,
+   "publication_id": 1001
+  },
+  {
+   "user_id": 1,
+   "id": 3002,
+   "membership_state": "free_signup",
+   "type": null,
+   "is_founding": false,
+   "publication_id": 1002
+  },
+  {
+   "user_id": 1,
+   "id": 3003,
+   "membership_state": "free_signup",
+   "type": null,
+   "is_founding": false,
+   "publication_id": 1003
+  },
+  {
+   "user_id": 1,
+   "id": 3004,
+   "membership_state": "subscribed",
+   "type": null,
+   "is_founding": false,
+   "publication_id": 1004
+  },
+  {
+   "user_id": 1,
+   "id": 3005,
+   "membership_state": "free_signup",
+   "type": null,
+   "is_founding": false,
+   "publication_id": 1005
+  },
+  {
+   "user_id": 1,
+   "id": 3006,
+   "membership_state": "free_signup",
+   "type": null,
+   "is_founding": false,
+   "publication_id": 1006
+  },
+  {
+   "user_id": 1,
+   "id": 3007,
+   "membership_state": "free_signup",
+   "type": null,
+   "is_founding": false,
+   "publication_id": 1007
+  },
+  {
+   "user_id": 1,
+   "id": 3008,
+   "membership_state": "free_signup",
+   "type": null,
+   "is_founding": false,
+   "publication_id": 1008
+  },
+  {
+   "user_id": 1,
+   "id": 3009,
+   "membership_state": "free_signup",
+   "type": null,
+   "is_founding": false,
+   "publication_id": 1009
+  },
+  {
+   "user_id": 1,
+   "id": 3010,
+   "membership_state": "free_signup",
+   "type": null,
+   "is_founding": false,
+   "publication_id": 1010
+  },
+  {
+   "user_id": 1,
+   "id": 3011,
+   "membership_state": "free_signup",
+   "type": null,
+   "is_founding": false,
+   "publication_id": 1011
+  },
+  {
+   "user_id": 1,
+   "id": 3012,
+   "membership_state": "subscribed",
+   "type": null,
+   "is_founding": false,
+   "publication_id": 1012
+  },
+  {
+   "user_id": 1,
+   "id": 3013,
+   "membership_state": "free_signup",
+   "type": null,
+   "is_founding": false,
+   "publication_id": 1013
+  }
+ ],
+ "publications": [
+  {
+   "id": 1000,
+   "name": "Field Notes on Rivers",
+   "subdomain": "fieldnotesonrivers",
+   "custom_domain": null,
+   "custom_domain_optional": false,
+   "logo_url": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-logo-1000.png",
+   "author_id": 2000,
+   "primary_user_id": 2000,
+   "hero_text": "Field Notes on Rivers is an invented publication used in tests.",
+   "copyright": "Mara Quill",
+   "payments_state": "enabled",
+   "author": {
+    "id": 2000,
+    "name": "Mara Quill",
+    "handle": "mara-quill"
+   }
+  },
+  {
+   "id": 1001,
+   "name": "The Quiet Ledger",
+   "subdomain": "thequietledger",
+   "custom_domain": "ledger.example.com",
+   "custom_domain_optional": false,
+   "logo_url": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-logo-1001.png",
+   "author_id": 2001,
+   "primary_user_id": 2001,
+   "hero_text": "The Quiet Ledger is an invented publication used in tests.",
+   "copyright": "Tobias Venn",
+   "payments_state": "disabled",
+   "author": {
+    "id": 2001,
+    "name": "Tobias Venn",
+    "handle": "tobias-venn"
+   }
+  },
+  {
+   "id": 1002,
+   "name": "Kiln & Glaze",
+   "subdomain": "kilnglaze",
+   "custom_domain": null,
+   "custom_domain_optional": false,
+   "logo_url": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-logo-1002.png",
+   "author_id": 2002,
+   "primary_user_id": 2002,
+   "hero_text": "Kiln & Glaze is an invented publication used in tests.",
+   "copyright": "Priya Oduya",
+   "payments_state": "disabled",
+   "author": {
+    "id": 2002,
+    "name": "Priya Oduya",
+    "handle": "priya-oduya"
+   }
+  },
+  {
+   "id": 1003,
+   "name": "Midweek Maps",
+   "subdomain": "midweekmaps",
+   "custom_domain": null,
+   "custom_domain_optional": false,
+   "logo_url": null,
+   "author_id": 2003,
+   "primary_user_id": 2003,
+   "hero_text": "Midweek Maps is an invented publication used in tests.",
+   "copyright": "Hollis Grange",
+   "payments_state": "disabled",
+   "author": {
+    "id": 2003,
+    "name": "Hollis Grange",
+    "handle": "hollis-grange"
+   }
+  },
+  {
+   "id": 1004,
+   "name": "Small Engines",
+   "subdomain": "smallengines",
+   "custom_domain": "smallengines.example.org",
+   "custom_domain_optional": false,
+   "logo_url": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-logo-1004.png",
+   "author_id": 2004,
+   "primary_user_id": 2004,
+   "hero_text": "Small Engines is an invented publication used in tests.",
+   "copyright": "Dana Ruiz-Park",
+   "payments_state": "enabled",
+   "author": {
+    "id": 2004,
+    "name": "Dana Ruiz-Park",
+    "handle": "dana-ruiz-park"
+   }
+  },
+  {
+   "id": 1005,
+   "name": "Soup Season",
+   "subdomain": "soupseason",
+   "custom_domain": null,
+   "custom_domain_optional": false,
+   "logo_url": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-logo-1005.png",
+   "author_id": 2005,
+   "primary_user_id": 2005,
+   "hero_text": "Soup Season is an invented publication used in tests.",
+   "copyright": "Wen Albrecht",
+   "payments_state": "disabled",
+   "author": {
+    "id": 2005,
+    "name": "Wen Albrecht",
+    "handle": "wen-albrecht"
+   }
+  },
+  {
+   "id": 1006,
+   "name": "Longhand",
+   "subdomain": "longhand",
+   "custom_domain": null,
+   "custom_domain_optional": false,
+   "logo_url": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-logo-1006.png",
+   "author_id": 2006,
+   "primary_user_id": 2006,
+   "hero_text": "Longhand is an invented publication used in tests.",
+   "copyright": "Ines Marlow",
+   "payments_state": "disabled",
+   "author": {
+    "id": 2006,
+    "name": "Ines Marlow",
+    "handle": "ines-marlow"
+   }
+  },
+  {
+   "id": 1007,
+   "name": "The Tidewater Review",
+   "subdomain": "thetidewaterreview",
+   "custom_domain": null,
+   "custom_domain_optional": false,
+   "logo_url": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-logo-1007.png",
+   "author_id": 2007,
+   "primary_user_id": 2007,
+   "hero_text": "The Tidewater Review is an invented publication used in tests.",
+   "copyright": "Felix Obi",
+   "payments_state": "disabled",
+   "author": {
+    "id": 2007,
+    "name": "Felix Obi",
+    "handle": "felix-obi"
+   }
+  },
+  {
+   "id": 1008,
+   "name": "Ferment Weekly",
+   "subdomain": "fermentweekly",
+   "custom_domain": null,
+   "custom_domain_optional": false,
+   "logo_url": null,
+   "author_id": 2008,
+   "primary_user_id": 2008,
+   "hero_text": "Ferment Weekly is an invented publication used in tests.",
+   "copyright": "Juniper Hale",
+   "payments_state": "disabled",
+   "author": {
+    "id": 2008,
+    "name": "Juniper Hale",
+    "handle": "juniper-hale"
+   }
+  },
+  {
+   "id": 1009,
+   "name": "Orbit Desk",
+   "subdomain": "orbitdesk",
+   "custom_domain": null,
+   "custom_domain_optional": false,
+   "logo_url": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-logo-1009.png",
+   "author_id": 2009,
+   "primary_user_id": 2009,
+   "hero_text": "Orbit Desk is an invented publication used in tests.",
+   "copyright": "Sam Achterberg",
+   "payments_state": "disabled",
+   "author": {
+    "id": 2009,
+    "name": "Sam Achterberg",
+    "handle": "sam-achterberg"
+   }
+  },
+  {
+   "id": 1010,
+   "name": "Porchlight",
+   "subdomain": "porchlight",
+   "custom_domain": null,
+   "custom_domain_optional": false,
+   "logo_url": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-logo-1010.png",
+   "author_id": 2010,
+   "primary_user_id": 2010,
+   "hero_text": "Porchlight is an invented publication used in tests.",
+   "copyright": "Rosa Delacroix-Imai",
+   "payments_state": "disabled",
+   "author": {
+    "id": 2010,
+    "name": "Rosa Delacroix-Imai",
+    "handle": "rosa-delacroix-imai"
+   }
+  },
+  {
+   "id": 1011,
+   "name": "Unsigned Dispatch",
+   "subdomain": "unsigneddispatch",
+   "custom_domain": null,
+   "custom_domain_optional": false,
+   "logo_url": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-logo-1011.png",
+   "author_id": null,
+   "primary_user_id": null,
+   "hero_text": "Unsigned Dispatch is an invented publication used in tests.",
+   "copyright": null,
+   "payments_state": "disabled",
+   "author": null
+  },
+  {
+   "id": 1012,
+   "name": "Cartographer’s Almanac",
+   "subdomain": "cartographersalmanac",
+   "custom_domain": null,
+   "custom_domain_optional": false,
+   "logo_url": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-logo-1012.png",
+   "author_id": 2012,
+   "primary_user_id": 2012,
+   "hero_text": "Cartographer’s Almanac is an invented publication used in tests.",
+   "copyright": "Theo Brandt",
+   "payments_state": "enabled",
+   "author": {
+    "id": 2012,
+    "name": "Theo Brandt",
+    "handle": "theo-brandt"
+   }
+  },
+  {
+   "id": 1013,
+   "name": "Second Draft",
+   "subdomain": "seconddraft",
+   "custom_domain": null,
+   "custom_domain_optional": false,
+   "logo_url": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-logo-1013.png",
+   "author_id": 2013,
+   "primary_user_id": 2013,
+   "hero_text": "Second Draft is an invented publication used in tests.",
+   "copyright": "Lena Kovač",
+   "payments_state": "disabled",
+   "author": {
+    "id": 2013,
+    "name": "Lena Kovač",
+    "handle": "lena-kova"
+   }
+  }
+ ]
+}

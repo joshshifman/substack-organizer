@@ -1,0 +1,174 @@
+// End-to-end check: loads the built extension into Chromium, serves Substack's API
+// from fixtures, and drives the reader. Run `pnpm build` first, then `pnpm e2e`.
+// Screenshots go to .amp/in/artifacts/.
+import { chromium } from 'playwright';
+import { mkdirSync, mkdtempSync, readFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
+import assert from 'node:assert/strict';
+
+const extensionPath = resolve('dist/chrome-mv3');
+const shots = resolve('.amp/in/artifacts');
+mkdirSync(shots, { recursive: true });
+
+const subscriptions = JSON.parse(readFileSync('tests/fixtures/subscriptions.json', 'utf8'));
+const postsByAuthor = JSON.parse(readFileSync('tests/fixtures/posts-by-author.json', 'utf8'));
+// GET /user/profile/self nests each publication inside its subscription.
+const pubsById = new Map(subscriptions.publications.map((p) => [p.id, p]));
+const profileSelf = {
+  id: 1,
+  handle: 'reader',
+  subscriptions: subscriptions.subscriptions.map(({ publication_id, ...s }) => ({ ...s, publication: pubsById.get(publication_id) })),
+};
+
+async function launch({ signedIn }) {
+  const context = await chromium.launchPersistentContext(mkdtempSync(join(tmpdir(), 'so-e2e-')), {
+    channel: 'chromium',
+    headless: true,
+    viewport: { width: 1280, height: 860 },
+    args: [`--disable-extensions-except=${extensionPath}`, `--load-extension=${extensionPath}`],
+  });
+  // Images go through Substack's CDN; answer with a placeholder so the test stays offline.
+  await context.route('https://substackcdn.com/**', (route) => {
+    const hue = [...route.request().url()].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 0);
+    route.fulfill({
+      contentType: 'image/svg+xml',
+      body: `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="64" height="64" fill="hsl(${hue} 45% 62%)"/></svg>`,
+    });
+  });
+  await context.route('https://substack.com/api/v1/**', (route) => {
+    const url = new URL(route.request().url());
+    if (!signedIn) return route.fulfill({ status: 401, json: { errors: [{ msg: 'Please sign in' }] } });
+    if (url.pathname === '/api/v1/user/profile/self') return route.fulfill({ json: profileSelf });
+    if (url.pathname === '/api/v1/subscriptions') return route.fulfill({ json: { subscriptions: [], publications: [] } });
+    if (url.pathname === '/api/v1/profile/posts') {
+      return route.fulfill({ json: postsByAuthor[url.searchParams.get('profile_user_id')] ?? { posts: [] } });
+    }
+    return route.fulfill({ status: 404, json: {} });
+  });
+  const worker = context.serviceWorkers()[0] ?? (await context.waitForEvent('serviceworker'));
+  const extensionId = new URL(worker.url()).host;
+  const page = await context.newPage();
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  await page.goto(`chrome-extension://${extensionId}/reader.html`);
+  return { context, page, errors };
+}
+
+// Publications whose authors have posts in the fixture, so feeds aren't empty.
+const pubsWithPosts = subscriptions.publications
+  .filter((p) => postsByAuthor[p.author_id]?.posts.some((post) => post.publication_id === p.id))
+  .map((p) => p.name);
+
+// ── Signed out ───────────────────────────────────────────────────────────────
+{
+  const { context, page } = await launch({ signedIn: false });
+  await page.getByRole('heading', { name: 'Sign in to Substack to see your subscriptions' }).waitFor();
+  await page.screenshot({ path: join(shots, '1-signed-out.png') });
+  await context.close();
+  console.log('✓ signed-out screen');
+}
+
+// ── Signed in ────────────────────────────────────────────────────────────────
+{
+  const { context, page, errors } = await launch({ signedIn: true });
+  const pubRow = (name) => page.locator('.pub').filter({ has: page.getByRole('link', { name, exact: true }) });
+
+  await page.getByRole('heading', { name: 'Pinned' }).waitFor();
+  await page.getByText('Pin the publications you read most').waitFor();
+  await page.screenshot({ path: join(shots, '2-empty-pinned.png') });
+
+  await page.getByRole('button', { name: 'Browse all subscriptions' }).click();
+  await page.getByRole('heading', { name: 'All subscriptions' }).waitFor();
+  assert.equal(await page.locator('.pub').count(), subscriptions.publications.length);
+  console.log(`✓ lists all ${subscriptions.publications.length} subscriptions`);
+
+  // Pin three publications.
+  for (const name of pubsWithPosts.slice(0, 3)) await pubRow(name).getByRole('button', { name: 'Pin to top' }).click();
+  assert.equal(await page.locator('.nav-item', { hasText: 'Pinned' }).locator('.nav-count').innerText(), '3');
+  console.log('✓ pinning updates the Pinned count');
+
+  // Create a folder from the sidebar.
+  await page.getByRole('button', { name: 'New folder' }).click();
+  await page.getByRole('textbox', { name: 'New folder name' }).fill('Must read');
+  await page.keyboard.press('Enter');
+  const slot = page.locator('.folder-slot', { hasText: 'Must read' });
+  await slot.waitFor();
+
+  // File one publication with the picker, another by dragging onto the folder.
+  const [picked, dragged, viaPickerNew] = pubsWithPosts.slice(3, 6);
+  await pubRow(picked).getByRole('button', { name: 'Folders' }).click();
+  await page.getByRole('dialog', { name: 'Choose folders' }).getByLabel('Must read').check();
+  await page.keyboard.press('Escape');
+  await pubRow(dragged).dragTo(slot);
+  assert.equal(await slot.locator('.nav-count').innerText(), '2');
+  const withLogo = subscriptions.publications.filter((p) => [picked, dragged].includes(p.name) && p.logo_url).length;
+  assert.equal(await slot.locator('.logo-stack img').count(), withLogo);
+  console.log('✓ filing by picker and by drag-and-drop');
+
+  // Create a second folder straight from the picker.
+  await pubRow(viaPickerNew).getByRole('button', { name: 'Folders' }).click();
+  await page.getByRole('dialog').getByRole('textbox', { name: 'New folder name' }).fill('Economics');
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Escape');
+  await page.locator('.folder-slot', { hasText: 'Economics' }).waitFor();
+  assert.ok(await pubRow(viaPickerNew).locator('.chip', { hasText: 'Economics' }).isVisible());
+  console.log('✓ creating a folder from the picker files the publication into it');
+
+  // Reorder: drag Economics above Must read.
+  await page.locator('.folder-slot', { hasText: 'Economics' }).dragTo(slot);
+  assert.deepEqual(await page.locator('.folder-slot .nav-label').allInnerTexts(), ['Economics', 'Must read']);
+  console.log('✓ folder reordering');
+  await page.screenshot({ path: join(shots, '3-all-publications.png') });
+
+  // Pinned feed shows posts from pinned publications, newest first.
+  await page.locator('.nav-item', { hasText: 'Pinned' }).click();
+  await page.locator('a.post').first().waitFor();
+  const dates = await page.locator('a.post time').evaluateAll((els) => els.map((e) => e.getAttribute('datetime')));
+  assert.deepEqual(dates, [...dates].sort().reverse());
+  const feedPubs = new Set(await page.locator('.post-pub').allInnerTexts());
+  assert.deepEqual([...feedPubs].sort(), pubsWithPosts.slice(0, 3).sort());
+  console.log(`✓ pinned feed: ${dates.length} posts from ${feedPubs.size} publications, newest first`);
+  assert.equal(await page.locator('.sidebar .active').count(), 1);
+  assert.equal(await page.locator('.sidebar .drop').count(), 0);
+  console.log('✓ exactly one sidebar item is active and no drop highlight is stuck');
+  await page.mouse.move(700, 400);
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: join(shots, '4-pinned-feed.png') });
+
+  // Folder view + persistence across reload.
+  await slot.click();
+  await page.getByRole('heading', { name: 'Must read' }).waitFor();
+  await page.locator('a.post').first().waitFor();
+  const folderFeedPubs = new Set(await page.locator('.post-pub').allInnerTexts());
+  assert.deepEqual([...folderFeedPubs].sort(), [picked, dragged].sort());
+  console.log('✓ folder feed shows only that folder’s publications');
+  await page.screenshot({ path: join(shots, '5-folder-feed.png') });
+  await page.reload();
+  await page.getByRole('heading', { name: 'Must read' }).waitFor();
+  assert.equal(await page.locator('.folder-slot', { hasText: 'Must read' }).locator('.nav-count').innerText(), '2');
+  console.log('✓ folders, pins and current view survive a reload');
+
+  // Rename and delete.
+  await page.getByRole('button', { name: 'Rename' }).click();
+  await page.getByRole('textbox', { name: 'Folder name' }).fill('Daily');
+  await page.keyboard.press('Enter');
+  await page.getByRole('heading', { name: 'Daily' }).waitFor();
+  page.once('dialog', (d) => d.accept());
+  await page.getByRole('button', { name: 'Delete' }).click();
+  await page.getByRole('heading', { name: 'Pinned' }).waitFor();
+  assert.deepEqual(await page.locator('.folder-slot .nav-label').allInnerTexts(), ['Economics']);
+  console.log('✓ rename and delete');
+
+  // Filtering.
+  await page.locator('.nav-item', { hasText: 'All subscriptions' }).click();
+  await page.getByRole('tab', { name: 'Publications' }).click();
+  await page.getByPlaceholder('Filter publications').fill(pubsWithPosts[0].slice(0, 6));
+  assert.ok((await page.locator('.pub').count()) < subscriptions.publications.length);
+  console.log('✓ filter');
+
+  assert.deepEqual(errors, [], `page errors: ${errors.join('\n')}`);
+  await context.close();
+}
+
+console.log(`\nScreenshots in ${shots}`);

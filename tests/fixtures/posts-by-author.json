@@ -1,0 +1,898 @@
+{
+ "2000": {
+  "posts": [
+   {
+    "id": 5000,
+    "publication_id": 1000,
+    "title": "Field Notes on Rivers: notes",
+    "subtitle": "Issue 7 of an invented newsletter.",
+    "description": null,
+    "slug": "field-notes-on-rivers-1",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://fieldnotesonrivers.substack.com/p/field-notes-on-rivers-1",
+    "post_date": "2026-09-26T15:00:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1000-0.jpeg"
+   },
+   {
+    "id": 5001,
+    "publication_id": 1000,
+    "title": "Field Notes on Rivers: a field guide",
+    "subtitle": "Issue 6 of an invented newsletter.",
+    "description": null,
+    "slug": "field-notes-on-rivers-2",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://fieldnotesonrivers.substack.com/p/field-notes-on-rivers-2",
+    "post_date": "2026-09-21T15:00:00.000Z",
+    "cover_image": null
+   },
+   {
+    "id": 5002,
+    "publication_id": 1000,
+    "title": "Field Notes on Rivers: what I got wrong",
+    "subtitle": null,
+    "description": null,
+    "slug": "field-notes-on-rivers-3",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://fieldnotesonrivers.substack.com/p/field-notes-on-rivers-3",
+    "post_date": "2026-09-16T15:00:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1000-2.jpeg"
+   },
+   {
+    "id": 5003,
+    "publication_id": 1000,
+    "title": "Field Notes on Rivers: the long version",
+    "subtitle": "Issue 4 of an invented newsletter.",
+    "description": null,
+    "slug": "field-notes-on-rivers-4",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://fieldnotesonrivers.substack.com/p/field-notes-on-rivers-4",
+    "post_date": "2026-09-11T15:00:00.000Z",
+    "cover_image": null
+   },
+   {
+    "id": 5004,
+    "publication_id": 1000,
+    "title": "Field Notes on Rivers: questions from readers",
+    "subtitle": "Issue 3 of an invented newsletter.",
+    "description": null,
+    "slug": "field-notes-on-rivers-5",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://fieldnotesonrivers.substack.com/p/field-notes-on-rivers-5",
+    "post_date": "2026-09-06T15:00:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1000-4.jpeg"
+   },
+   {
+    "id": 5005,
+    "publication_id": 1000,
+    "title": "Field Notes on Rivers: a short history",
+    "subtitle": null,
+    "description": null,
+    "slug": "field-notes-on-rivers-6",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://fieldnotesonrivers.substack.com/p/field-notes-on-rivers-6",
+    "post_date": "2026-09-01T15:00:00.000Z",
+    "cover_image": null
+   },
+   {
+    "id": 5006,
+    "publication_id": 1000,
+    "title": "Field Notes on Rivers: the numbers",
+    "subtitle": "Issue 1 of an invented newsletter.",
+    "description": null,
+    "slug": "field-notes-on-rivers-7",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://fieldnotesonrivers.substack.com/p/field-notes-on-rivers-7",
+    "post_date": "2026-08-27T15:00:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1000-6.jpeg"
+   }
+  ]
+ },
+ "2001": {
+  "posts": [
+   {
+    "id": 5007,
+    "publication_id": 1001,
+    "title": "The Quiet Ledger: a field guide",
+    "subtitle": "Issue 6 of an invented newsletter.",
+    "description": null,
+    "slug": "the-quiet-ledger-1",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://ledger.example.com/p/the-quiet-ledger-1",
+    "post_date": "2026-09-25T22:12:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1001-0.jpeg"
+   },
+   {
+    "id": 5008,
+    "publication_id": 1001,
+    "title": "The Quiet Ledger: what I got wrong",
+    "subtitle": "Issue 5 of an invented newsletter.",
+    "description": null,
+    "slug": "the-quiet-ledger-2",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://ledger.example.com/p/the-quiet-ledger-2",
+    "post_date": "2026-09-20T22:12:00.000Z",
+    "cover_image": null
+   },
+   {
+    "id": 5009,
+    "publication_id": 1001,
+    "title": "The Quiet Ledger: the long version",
+    "subtitle": null,
+    "description": null,
+    "slug": "the-quiet-ledger-3",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://ledger.example.com/p/the-quiet-ledger-3",
+    "post_date": "2026-09-15T22:12:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1001-2.jpeg"
+   },
+   {
+    "id": 5010,
+    "publication_id": 1001,
+    "title": "The Quiet Ledger: questions from readers",
+    "subtitle": "Issue 3 of an invented newsletter.",
+    "description": null,
+    "slug": "the-quiet-ledger-4",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://ledger.example.com/p/the-quiet-ledger-4",
+    "post_date": "2026-09-10T22:12:00.000Z",
+    "cover_image": null
+   },
+   {
+    "id": 5011,
+    "publication_id": 1001,
+    "title": "The Quiet Ledger: a short history",
+    "subtitle": "Issue 2 of an invented newsletter.",
+    "description": null,
+    "slug": "the-quiet-ledger-5",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://ledger.example.com/p/the-quiet-ledger-5",
+    "post_date": "2026-09-05T22:12:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1001-4.jpeg"
+   },
+   {
+    "id": 5012,
+    "publication_id": 1001,
+    "title": "The Quiet Ledger: the numbers",
+    "subtitle": null,
+    "description": null,
+    "slug": "the-quiet-ledger-6",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://ledger.example.com/p/the-quiet-ledger-6",
+    "post_date": "2026-08-31T22:12:00.000Z",
+    "cover_image": null
+   }
+  ]
+ },
+ "2002": {
+  "posts": [
+   {
+    "id": 5018,
+    "publication_id": 9999,
+    "title": "A guest post somewhere else",
+    "subtitle": "Issue 5 of an invented newsletter.",
+    "description": null,
+    "slug": "guest",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://elsewhere.example.net/p/guest",
+    "post_date": "2026-09-25T05:24:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1002-0.jpeg"
+   },
+   {
+    "id": 5013,
+    "publication_id": 1002,
+    "title": "Kiln & Glaze: what I got wrong",
+    "subtitle": "Issue 5 of an invented newsletter.",
+    "description": null,
+    "slug": "kiln-glaze-1",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://kilnglaze.substack.com/p/kiln-glaze-1",
+    "post_date": "2026-09-25T05:24:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1002-0.jpeg"
+   },
+   {
+    "id": 5014,
+    "publication_id": 1002,
+    "title": "Kiln & Glaze: the long version",
+    "subtitle": "Issue 4 of an invented newsletter.",
+    "description": null,
+    "slug": "kiln-glaze-2",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://kilnglaze.substack.com/p/kiln-glaze-2",
+    "post_date": "2026-09-20T05:24:00.000Z",
+    "cover_image": null
+   },
+   {
+    "id": 5015,
+    "publication_id": 1002,
+    "title": "Kiln & Glaze: questions from readers",
+    "subtitle": null,
+    "description": null,
+    "slug": "kiln-glaze-3",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://kilnglaze.substack.com/p/kiln-glaze-3",
+    "post_date": "2026-09-15T05:24:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1002-2.jpeg"
+   },
+   {
+    "id": 5016,
+    "publication_id": 1002,
+    "title": "Kiln & Glaze: a short history",
+    "subtitle": "Issue 2 of an invented newsletter.",
+    "description": null,
+    "slug": "kiln-glaze-4",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://kilnglaze.substack.com/p/kiln-glaze-4",
+    "post_date": "2026-09-10T05:24:00.000Z",
+    "cover_image": null
+   },
+   {
+    "id": 5017,
+    "publication_id": 1002,
+    "title": "Kiln & Glaze: the numbers",
+    "subtitle": "Issue 1 of an invented newsletter.",
+    "description": null,
+    "slug": "kiln-glaze-5",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://kilnglaze.substack.com/p/kiln-glaze-5",
+    "post_date": "2026-09-05T05:24:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1002-4.jpeg"
+   }
+  ]
+ },
+ "2003": {
+  "posts": [
+   {
+    "id": 5019,
+    "publication_id": 1003,
+    "title": "Midweek Maps: the long version",
+    "subtitle": "Issue 6 of an invented newsletter.",
+    "description": null,
+    "slug": "midweek-maps-1",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://midweekmaps.substack.com/p/midweek-maps-1",
+    "post_date": "2026-09-24T12:36:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1003-0.jpeg"
+   },
+   {
+    "id": 5020,
+    "publication_id": 1003,
+    "title": "Midweek Maps: questions from readers",
+    "subtitle": "Issue 5 of an invented newsletter.",
+    "description": null,
+    "slug": "midweek-maps-2",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://midweekmaps.substack.com/p/midweek-maps-2",
+    "post_date": "2026-09-19T12:36:00.000Z",
+    "cover_image": null
+   },
+   {
+    "id": 5021,
+    "publication_id": 1003,
+    "title": "Midweek Maps: a short history",
+    "subtitle": null,
+    "description": null,
+    "slug": "midweek-maps-3",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://midweekmaps.substack.com/p/midweek-maps-3",
+    "post_date": "2026-09-14T12:36:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1003-2.jpeg"
+   },
+   {
+    "id": 5022,
+    "publication_id": 1003,
+    "title": "Midweek Maps: the numbers",
+    "subtitle": "Issue 3 of an invented newsletter.",
+    "description": null,
+    "slug": "midweek-maps-4",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://midweekmaps.substack.com/p/midweek-maps-4",
+    "post_date": "2026-09-09T12:36:00.000Z",
+    "cover_image": null
+   },
+   {
+    "id": 5023,
+    "publication_id": 1003,
+    "title": "Midweek Maps: an interview",
+    "subtitle": "Issue 2 of an invented newsletter.",
+    "description": null,
+    "slug": "midweek-maps-5",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://midweekmaps.substack.com/p/midweek-maps-5",
+    "post_date": "2026-09-04T12:36:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1003-4.jpeg"
+   },
+   {
+    "id": 5024,
+    "publication_id": 1003,
+    "title": "Midweek Maps: notes",
+    "subtitle": null,
+    "description": null,
+    "slug": "midweek-maps-6",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://midweekmaps.substack.com/p/midweek-maps-6",
+    "post_date": "2026-08-30T12:36:00.000Z",
+    "cover_image": null
+   }
+  ]
+ },
+ "2004": {
+  "posts": [
+   {
+    "id": 5025,
+    "publication_id": 1004,
+    "title": "Small Engines: questions from readers",
+    "subtitle": "Issue 5 of an invented newsletter.",
+    "description": null,
+    "slug": "small-engines-1",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://smallengines.example.org/p/small-engines-1",
+    "post_date": "2026-09-23T19:48:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1004-0.jpeg"
+   },
+   {
+    "id": 5026,
+    "publication_id": 1004,
+    "title": "Small Engines: a short history",
+    "subtitle": "Issue 4 of an invented newsletter.",
+    "description": null,
+    "slug": "small-engines-2",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://smallengines.example.org/p/small-engines-2",
+    "post_date": "2026-09-18T19:48:00.000Z",
+    "cover_image": null
+   },
+   {
+    "id": 5027,
+    "publication_id": 1004,
+    "title": "Small Engines: the numbers",
+    "subtitle": null,
+    "description": null,
+    "slug": "small-engines-3",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://smallengines.example.org/p/small-engines-3",
+    "post_date": "2026-09-13T19:48:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1004-2.jpeg"
+   },
+   {
+    "id": 5028,
+    "publication_id": 1004,
+    "title": "Small Engines: an interview",
+    "subtitle": "Issue 2 of an invented newsletter.",
+    "description": null,
+    "slug": "small-engines-4",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://smallengines.example.org/p/small-engines-4",
+    "post_date": "2026-09-08T19:48:00.000Z",
+    "cover_image": null
+   },
+   {
+    "id": 5029,
+    "publication_id": 1004,
+    "title": "Small Engines: notes",
+    "subtitle": "Issue 1 of an invented newsletter.",
+    "description": null,
+    "slug": "small-engines-5",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://smallengines.example.org/p/small-engines-5",
+    "post_date": "2026-09-03T19:48:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1004-4.jpeg"
+   }
+  ]
+ },
+ "2005": {
+  "posts": [
+   {
+    "id": 5030,
+    "publication_id": 1005,
+    "title": "Soup Season: a short history",
+    "subtitle": "Issue 8 of an invented newsletter.",
+    "description": null,
+    "slug": "soup-season-1",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://soupseason.substack.com/p/soup-season-1",
+    "post_date": "2026-09-23T03:00:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1005-0.jpeg"
+   },
+   {
+    "id": 5031,
+    "publication_id": 1005,
+    "title": "Soup Season: the numbers",
+    "subtitle": "Issue 7 of an invented newsletter.",
+    "description": null,
+    "slug": "soup-season-2",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://soupseason.substack.com/p/soup-season-2",
+    "post_date": "2026-09-18T03:00:00.000Z",
+    "cover_image": null
+   },
+   {
+    "id": 5032,
+    "publication_id": 1005,
+    "title": "Soup Season: an interview",
+    "subtitle": null,
+    "description": null,
+    "slug": "soup-season-3",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://soupseason.substack.com/p/soup-season-3",
+    "post_date": "2026-09-13T03:00:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1005-2.jpeg"
+   },
+   {
+    "id": 5033,
+    "publication_id": 1005,
+    "title": "Soup Season: notes",
+    "subtitle": "Issue 5 of an invented newsletter.",
+    "description": null,
+    "slug": "soup-season-4",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://soupseason.substack.com/p/soup-season-4",
+    "post_date": "2026-09-08T03:00:00.000Z",
+    "cover_image": null
+   },
+   {
+    "id": 5034,
+    "publication_id": 1005,
+    "title": "Soup Season: a field guide",
+    "subtitle": "Issue 4 of an invented newsletter.",
+    "description": null,
+    "slug": "soup-season-5",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://soupseason.substack.com/p/soup-season-5",
+    "post_date": "2026-09-03T03:00:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1005-4.jpeg"
+   },
+   {
+    "id": 5035,
+    "publication_id": 1005,
+    "title": "Soup Season: what I got wrong",
+    "subtitle": null,
+    "description": null,
+    "slug": "soup-season-6",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://soupseason.substack.com/p/soup-season-6",
+    "post_date": "2026-08-29T03:00:00.000Z",
+    "cover_image": null
+   },
+   {
+    "id": 5036,
+    "publication_id": 1005,
+    "title": "Soup Season: the long version",
+    "subtitle": "Issue 2 of an invented newsletter.",
+    "description": null,
+    "slug": "soup-season-7",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://soupseason.substack.com/p/soup-season-7",
+    "post_date": "2026-08-24T03:00:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1005-6.jpeg"
+   },
+   {
+    "id": 5037,
+    "publication_id": 1005,
+    "title": "Soup Season: questions from readers",
+    "subtitle": "Issue 1 of an invented newsletter.",
+    "description": null,
+    "slug": "soup-season-8",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://soupseason.substack.com/p/soup-season-8",
+    "post_date": "2026-08-19T03:00:00.000Z",
+    "cover_image": null
+   }
+  ]
+ },
+ "2006": {
+  "posts": [
+   {
+    "id": 5038,
+    "publication_id": 1006,
+    "title": "Longhand: the numbers",
+    "subtitle": "Issue 4 of an invented newsletter.",
+    "description": null,
+    "slug": "longhand-1",
+    "type": "newsletter",
+    "audience": "only_paid",
+    "canonical_url": "https://longhand.substack.com/p/longhand-1",
+    "post_date": "2026-09-22T10:12:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1006-0.jpeg"
+   },
+   {
+    "id": 5039,
+    "publication_id": 1006,
+    "title": "Longhand: an interview",
+    "subtitle": "Issue 3 of an invented newsletter.",
+    "description": null,
+    "slug": "longhand-2",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://longhand.substack.com/p/longhand-2",
+    "post_date": "2026-09-17T10:12:00.000Z",
+    "cover_image": null
+   },
+   {
+    "id": 5040,
+    "publication_id": 1006,
+    "title": "Longhand: notes",
+    "subtitle": null,
+    "description": null,
+    "slug": "longhand-3",
+    "type": "newsletter",
+    "audience": "only_paid",
+    "canonical_url": "https://longhand.substack.com/p/longhand-3",
+    "post_date": "2026-09-12T10:12:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1006-2.jpeg"
+   },
+   {
+    "id": 5041,
+    "publication_id": 1006,
+    "title": "Longhand: a field guide",
+    "subtitle": "Issue 1 of an invented newsletter.",
+    "description": null,
+    "slug": "longhand-4",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://longhand.substack.com/p/longhand-4",
+    "post_date": "2026-09-07T10:12:00.000Z",
+    "cover_image": null
+   }
+  ]
+ },
+ "2007": {
+  "posts": [
+   {
+    "id": 5042,
+    "publication_id": 1007,
+    "title": "The Tidewater Review: an interview",
+    "subtitle": "Issue 6 of an invented newsletter.",
+    "description": null,
+    "slug": "the-tidewater-review-1",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://thetidewaterreview.substack.com/p/the-tidewater-review-1",
+    "post_date": "2026-09-21T17:24:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1007-0.jpeg"
+   },
+   {
+    "id": 5043,
+    "publication_id": 1007,
+    "title": "The Tidewater Review: notes",
+    "subtitle": "Issue 5 of an invented newsletter.",
+    "description": null,
+    "slug": "the-tidewater-review-2",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://thetidewaterreview.substack.com/p/the-tidewater-review-2",
+    "post_date": "2026-09-16T17:24:00.000Z",
+    "cover_image": null
+   },
+   {
+    "id": 5044,
+    "publication_id": 1007,
+    "title": "The Tidewater Review: a field guide",
+    "subtitle": null,
+    "description": null,
+    "slug": "the-tidewater-review-3",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://thetidewaterreview.substack.com/p/the-tidewater-review-3",
+    "post_date": "2026-09-11T17:24:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1007-2.jpeg"
+   },
+   {
+    "id": 5045,
+    "publication_id": 1007,
+    "title": "The Tidewater Review: what I got wrong",
+    "subtitle": "Issue 3 of an invented newsletter.",
+    "description": null,
+    "slug": "the-tidewater-review-4",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://thetidewaterreview.substack.com/p/the-tidewater-review-4",
+    "post_date": "2026-09-06T17:24:00.000Z",
+    "cover_image": null
+   },
+   {
+    "id": 5046,
+    "publication_id": 1007,
+    "title": "The Tidewater Review: the long version",
+    "subtitle": "Issue 2 of an invented newsletter.",
+    "description": null,
+    "slug": "the-tidewater-review-5",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://thetidewaterreview.substack.com/p/the-tidewater-review-5",
+    "post_date": "2026-09-01T17:24:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1007-4.jpeg"
+   },
+   {
+    "id": 5047,
+    "publication_id": 1007,
+    "title": "The Tidewater Review: questions from readers",
+    "subtitle": null,
+    "description": null,
+    "slug": "the-tidewater-review-6",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://thetidewaterreview.substack.com/p/the-tidewater-review-6",
+    "post_date": "2026-08-27T17:24:00.000Z",
+    "cover_image": null
+   }
+  ]
+ },
+ "2008": {
+  "posts": [
+   {
+    "id": 5048,
+    "publication_id": 1008,
+    "title": "Ferment Weekly: notes",
+    "subtitle": "Issue 3 of an invented newsletter.",
+    "description": null,
+    "slug": "ferment-weekly-1",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://fermentweekly.substack.com/p/ferment-weekly-1",
+    "post_date": "2026-09-21T00:36:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1008-0.jpeg"
+   },
+   {
+    "id": 5049,
+    "publication_id": 1008,
+    "title": "Ferment Weekly: a field guide",
+    "subtitle": "Issue 2 of an invented newsletter.",
+    "description": null,
+    "slug": "ferment-weekly-2",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://fermentweekly.substack.com/p/ferment-weekly-2",
+    "post_date": "2026-09-16T00:36:00.000Z",
+    "cover_image": null
+   },
+   {
+    "id": 5050,
+    "publication_id": 1008,
+    "title": "Ferment Weekly: what I got wrong",
+    "subtitle": null,
+    "description": null,
+    "slug": "ferment-weekly-3",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://fermentweekly.substack.com/p/ferment-weekly-3",
+    "post_date": "2026-09-11T00:36:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1008-2.jpeg"
+   }
+  ]
+ },
+ "2009": {
+  "posts": [
+   {
+    "id": 5051,
+    "publication_id": 1009,
+    "title": "Orbit Desk: a field guide",
+    "subtitle": "Issue 5 of an invented newsletter.",
+    "description": null,
+    "slug": "orbit-desk-1",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://orbitdesk.substack.com/p/orbit-desk-1",
+    "post_date": "2026-09-20T07:48:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1009-0.jpeg"
+   },
+   {
+    "id": 5052,
+    "publication_id": 1009,
+    "title": "Orbit Desk: what I got wrong",
+    "subtitle": "Issue 4 of an invented newsletter.",
+    "description": null,
+    "slug": "orbit-desk-2",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://orbitdesk.substack.com/p/orbit-desk-2",
+    "post_date": "2026-09-15T07:48:00.000Z",
+    "cover_image": null
+   },
+   {
+    "id": 5053,
+    "publication_id": 1009,
+    "title": "Orbit Desk: the long version",
+    "subtitle": null,
+    "description": null,
+    "slug": "orbit-desk-3",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://orbitdesk.substack.com/p/orbit-desk-3",
+    "post_date": "2026-09-10T07:48:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1009-2.jpeg"
+   },
+   {
+    "id": 5054,
+    "publication_id": 1009,
+    "title": "Orbit Desk: questions from readers",
+    "subtitle": "Issue 2 of an invented newsletter.",
+    "description": null,
+    "slug": "orbit-desk-4",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://orbitdesk.substack.com/p/orbit-desk-4",
+    "post_date": "2026-09-05T07:48:00.000Z",
+    "cover_image": null
+   },
+   {
+    "id": 5055,
+    "publication_id": 1009,
+    "title": "Orbit Desk: a short history",
+    "subtitle": "Issue 1 of an invented newsletter.",
+    "description": null,
+    "slug": "orbit-desk-5",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://orbitdesk.substack.com/p/orbit-desk-5",
+    "post_date": "2026-08-31T07:48:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1009-4.jpeg"
+   }
+  ]
+ },
+ "2010": {
+  "posts": []
+ },
+ "2012": {
+  "posts": [
+   {
+    "id": 5056,
+    "publication_id": 1012,
+    "title": "Cartographer’s Almanac: questions from readers",
+    "subtitle": "Issue 4 of an invented newsletter.",
+    "description": null,
+    "slug": "cartographer-s-almanac-1",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://cartographersalmanac.substack.com/p/cartographer-s-almanac-1",
+    "post_date": "2026-09-18T05:24:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1012-0.jpeg"
+   },
+   {
+    "id": 5057,
+    "publication_id": 1012,
+    "title": "Cartographer’s Almanac: a short history",
+    "subtitle": "Issue 3 of an invented newsletter.",
+    "description": null,
+    "slug": "cartographer-s-almanac-2",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://cartographersalmanac.substack.com/p/cartographer-s-almanac-2",
+    "post_date": "2026-09-13T05:24:00.000Z",
+    "cover_image": null
+   },
+   {
+    "id": 5058,
+    "publication_id": 1012,
+    "title": "Cartographer’s Almanac: the numbers",
+    "subtitle": null,
+    "description": null,
+    "slug": "cartographer-s-almanac-3",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://cartographersalmanac.substack.com/p/cartographer-s-almanac-3",
+    "post_date": "2026-09-08T05:24:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1012-2.jpeg"
+   },
+   {
+    "id": 5059,
+    "publication_id": 1012,
+    "title": "Cartographer’s Almanac: an interview",
+    "subtitle": "Issue 1 of an invented newsletter.",
+    "description": null,
+    "slug": "cartographer-s-almanac-4",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://cartographersalmanac.substack.com/p/cartographer-s-almanac-4",
+    "post_date": "2026-09-03T05:24:00.000Z",
+    "cover_image": null
+   }
+  ]
+ },
+ "2013": {
+  "posts": [
+   {
+    "id": 5060,
+    "publication_id": 1013,
+    "title": "Second Draft: a short history",
+    "subtitle": "Issue 5 of an invented newsletter.",
+    "description": null,
+    "slug": "second-draft-1",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://seconddraft.substack.com/p/second-draft-1",
+    "post_date": "2026-09-17T12:36:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1013-0.jpeg"
+   },
+   {
+    "id": 5061,
+    "publication_id": 1013,
+    "title": "Second Draft: the numbers",
+    "subtitle": "Issue 4 of an invented newsletter.",
+    "description": null,
+    "slug": "second-draft-2",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://seconddraft.substack.com/p/second-draft-2",
+    "post_date": "2026-09-12T12:36:00.000Z",
+    "cover_image": null
+   },
+   {
+    "id": 5062,
+    "publication_id": 1013,
+    "title": "Second Draft: an interview",
+    "subtitle": null,
+    "description": null,
+    "slug": "second-draft-3",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://seconddraft.substack.com/p/second-draft-3",
+    "post_date": "2026-09-07T12:36:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1013-2.jpeg"
+   },
+   {
+    "id": 5063,
+    "publication_id": 1013,
+    "title": "Second Draft: notes",
+    "subtitle": "Issue 2 of an invented newsletter.",
+    "description": null,
+    "slug": "second-draft-4",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://seconddraft.substack.com/p/second-draft-4",
+    "post_date": "2026-09-02T12:36:00.000Z",
+    "cover_image": null
+   },
+   {
+    "id": 5064,
+    "publication_id": 1013,
+    "title": "Second Draft: a field guide",
+    "subtitle": "Issue 1 of an invented newsletter.",
+    "description": null,
+    "slug": "second-draft-5",
+    "type": "newsletter",
+    "audience": "everyone",
+    "canonical_url": "https://seconddraft.substack.com/p/second-draft-5",
+    "post_date": "2026-08-28T12:36:00.000Z",
+    "cover_image": "https://substack-post-media.s3.amazonaws.com/public/images/fixture-cover-1013-4.jpeg"
+   }
+  ]
+ }
+}
