@@ -78,7 +78,7 @@ a { color: inherit; }
   transition: background 120ms ease, box-shadow 120ms ease;
 }
 .nav-item:hover, .folder-slot:hover { background: var(--rack-raised); }
-.nav-item.active, .folder-slot.active { background: var(--rack-raised); color: #fff; box-shadow: inset 3px 0 0 var(--amber); }
+.nav-item.active, .folder-slot.active { background: var(--rack-raised); color: #fff; }
 .nav-item.drop, .folder-slot.drop { background: var(--cobalt); color: #fff; box-shadow: none; }
 /* Nav icons share the logo stack's width so every label lines up. */
 .nav-icon { width: 36px; flex: none; display: flex; padding-left: 2px; }

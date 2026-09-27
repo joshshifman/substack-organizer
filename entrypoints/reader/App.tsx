@@ -291,7 +291,11 @@ export default function App() {
         </header>
 
         {viewPubs.length === 0 ? (
-          <EmptyView view={view} onBrowse={() => { setView({ kind: 'all' }); setMode('publications'); }} />
+          pubs.length === 0 ? (
+            <NoSubscriptions />
+          ) : (
+            <EmptyView view={view} onBrowse={() => { setView({ kind: 'all' }); setMode('publications'); }} />
+          )
         ) : effectiveMode === 'posts' ? (
           <>
             {currentFeed && currentFeed.failed.length > 0 && (
@@ -359,6 +363,18 @@ function FolderTitle({ name, onRename, onDelete }: { name: string; onRename: (n:
       <button className="text-button" onClick={() => setEditing(true)}>Rename</button>
       <button className="text-button danger" onClick={onDelete}>Delete</button>
     </>
+  );
+}
+
+function NoSubscriptions() {
+  return (
+    <div className="empty">
+      <h2>You're not subscribed to anything on Substack yet</h2>
+      <p>Subscribe to a few publications and they'll show up here, ready to sort into folders.</p>
+      <a className="button primary" href="https://substack.com/discover" target="_blank" rel="noreferrer">
+        Find publications on Substack
+      </a>
+    </div>
   );
 }
 

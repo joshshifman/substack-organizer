@@ -34,7 +34,7 @@ async function eventually(check, timeout = 5000) {
   }
 }
 
-async function launch({ signedIn }) {
+async function launch({ signedIn, empty = false }) {
   const calls = { posts: 0 };
   const context = await chromium.launchPersistentContext(mkdtempSync(join(tmpdir(), 'so-e2e-')), {
     channel: 'chromium',
@@ -53,7 +53,7 @@ async function launch({ signedIn }) {
   await context.route('https://substack.com/api/v1/**', (route) => {
     const url = new URL(route.request().url());
     if (!signedIn) return route.fulfill({ status: 401, json: { errors: [{ msg: 'Please sign in' }] } });
-    if (url.pathname === '/api/v1/user/profile/self') return route.fulfill({ json: profileSelf });
+    if (url.pathname === '/api/v1/user/profile/self') return route.fulfill({ json: empty ? { ...profileSelf, subscriptions: [] } : profileSelf });
     if (url.pathname === '/api/v1/subscriptions') return route.fulfill({ json: { subscriptions: [], publications: [] } });
     if (url.pathname === '/api/v1/profile/posts') {
       calls.posts++;
@@ -82,6 +82,19 @@ const pubsWithPosts = subscriptions.publications
   await page.screenshot({ path: join(shots, '1-signed-out.png') });
   await context.close();
   console.log('✓ signed-out screen');
+}
+
+// ── Signed in, no subscriptions ──────────────────────────────────────────────
+{
+  const { context, page, errors } = await launch({ signedIn: true, empty: true });
+  await page.getByRole('heading', { name: 'You\'re not subscribed to anything on Substack yet' }).waitFor();
+  await page.locator('.nav-item', { hasText: 'All subscriptions' }).click();
+  await page.getByRole('heading', { name: 'You\'re not subscribed to anything on Substack yet' }).waitFor();
+  assert.equal(await page.locator('.banner').count(), 0);
+  assert.deepEqual(errors, []);
+  await page.screenshot({ path: join(shots, '1b-no-subscriptions.png') });
+  await context.close();
+  console.log('✓ an account with no subscriptions gets the empty screen, not an error');
 }
 
 // ── Signed in ────────────────────────────────────────────────────────────────

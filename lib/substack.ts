@@ -169,7 +169,10 @@ export async function fetchSubscriptions(): Promise<Publication[]> {
   const fromLegacy = parseSubscriptions(legacy);
   if (fromLegacy.length) return fromLegacy;
 
-  // Rather than show an empty library, say what came back so it can be fixed.
+  // The profile answered in the shape we know with an empty list: a real empty account.
+  if (Array.isArray(self?.subscriptions)) return [];
+
+  // Neither response looks like what we expect; say what came back so it can be fixed.
   const describe = (body: Json) => `{${Object.keys(body ?? {}).slice(0, 12).join(', ')}}`;
   throw new Error(
     `Substack returned no subscriptions. profile/self had ${self?.subscriptions?.length ?? 'no'} subscriptions ` +

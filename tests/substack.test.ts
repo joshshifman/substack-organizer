@@ -106,7 +106,13 @@ describe('fetchSubscriptions', () => {
     expect(await fetchSubscriptions()).toHaveLength(subscriptionsFixture.subscriptions.length);
   });
 
-  it('reports what came back instead of returning an empty list', async () => {
+  it('returns an empty list for an account with no subscriptions', async () => {
+    // Real accounts: /subscriptions can list unrelated publications with no subscriptions.
+    respond({ '/user/profile/self': { id: 1, subscriptions: [] }, '/subscriptions': { subscriptions: [], publications: [{ id: 7, name: 'X' }] } });
+    expect(await fetchSubscriptions()).toEqual([]);
+  });
+
+  it('reports what came back when the response shape is unrecognized', async () => {
     respond({ '/user/profile/self': { id: 1, handle: 'me' }, '/subscriptions': { subscriptions: [], publications: [] } });
     await expect(fetchSubscriptions()).rejects.toThrow(/no subscriptions.*\{id, handle\}.*\{subscriptions, publications\}/);
   });
