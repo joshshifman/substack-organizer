@@ -104,6 +104,14 @@ const pubsWithPosts = subscriptions.publications
 
   await page.getByRole('heading', { name: 'Pinned' }).waitFor();
   await page.getByText('Pin the publications you read most').waitFor();
+  const icons = await page.evaluate(async () => {
+    const favicon = document.querySelector('link[rel=icon]')?.getAttribute('href');
+    const { action, icons } = chrome.runtime.getManifest();
+    const urls = [favicon, ...Object.values(icons ?? {}), ...Object.values(action?.default_icon ?? {})];
+    return Promise.all(urls.map(async (u) => [u, u ? (await fetch(u)).status : 'missing']));
+  });
+  assert.ok(icons.length >= 9 && icons.every(([, status]) => status === 200), JSON.stringify(icons));
+  console.log('✓ favicon and toolbar icons are packaged');
   await page.screenshot({ path: join(shots, '2-empty-pinned.png') });
 
   await page.getByRole('button', { name: 'Browse all subscriptions' }).click();
