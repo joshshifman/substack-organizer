@@ -1,6 +1,6 @@
 import { useRef, useState, type CSSProperties, type DragEvent, type ReactNode } from 'react';
-import * as lib from '@/lib/library';
-import { unsortedIds, type Folder, type Library } from '@/lib/library';
+import { newFolderId, parseLibrary, unsortedIds, type Folder, type Library, type LibraryOp } from '@/lib/library';
+import type { LibraryDoc } from '@/lib/store';
 import { thumb, type Publication } from '@/lib/substack';
 import type { View } from './App';
 import { Icon, type IconName } from './icons';
@@ -14,12 +14,13 @@ interface Props {
   pubsById: Map<number, Publication>;
   view: View;
   onView: (v: View) => void;
-  update: (fn: (l: Library) => Library) => void;
+  mutate: (...ops: LibraryOp[]) => void;
+  sync: LibraryDoc;
   fetchedAt: number;
   onRefresh: () => Promise<void>;
 }
 
-export function Sidebar({ library, pubs, pubsById, view, onView, update, fetchedAt, onRefresh }: Props) {
+export function Sidebar({ library, pubs, pubsById, view, onView, mutate, sync, fetchedAt, onRefresh }: Props) {
   const [adding, setAdding] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
@@ -39,9 +40,9 @@ export function Sidebar({ library, pubs, pubsById, view, onView, update, fetched
 
   const importLibrary = async (file: File) => {
     try {
-      const next = lib.parseLibrary(JSON.parse(await file.text()));
+      const next = parseLibrary(JSON.parse(await file.text()));
       if (confirm(`Replace your folders and pins with the ${next.folders.length} folders in “${file.name}”?`)) {
-        update(() => next);
+        mutate({ kind: 'replace', library: next });
       }
       setImportError(null);
     } catch (err) {
@@ -62,7 +63,7 @@ export function Sidebar({ library, pubs, pubsById, view, onView, update, fetched
           count={live(library.pinned).length}
           active={view.kind === 'pinned'}
           onClick={() => onView({ kind: 'pinned' })}
-          onDropPub={(id) => update((l) => (l.pinned.includes(id) ? l : lib.togglePin(l, id)))}
+          onDropPub={(id) => mutate({ kind: 'setPinned', pubId: id, pinned: true })}
         />
         <NavItem icon="all" label="All subscriptions" count={pubs.length} active={view.kind === 'all'} onClick={() => onView({ kind: 'all' })} />
         <NavItem icon="inbox" label="Unsorted" count={unsortedCount} active={view.kind === 'unsorted'} onClick={() => onView({ kind: 'unsorted' })} />
@@ -83,8 +84,8 @@ export function Sidebar({ library, pubs, pubsById, view, onView, update, fetched
             pubs={live(folder.pubIds).flatMap((id) => pubsById.get(id) ?? [])}
             active={view.kind === 'folder' && view.id === folder.id}
             onClick={() => onView({ kind: 'folder', id: folder.id })}
-            onDropPub={(id) => update((l) => lib.addToFolder(l, folder.id, id))}
-            onDropFolder={(id) => update((l) => lib.moveFolder(l, id, index))}
+            onDropPub={(id) => mutate({ kind: 'addToFolder', folderId: folder.id, pubId: id })}
+            onDropFolder={(id) => mutate({ kind: 'moveFolder', folderId: id, toIndex: index })}
           />
         ))}
         {adding && (
@@ -92,7 +93,7 @@ export function Sidebar({ library, pubs, pubsById, view, onView, update, fetched
             <NewFolderInput
               onDone={(name) => {
                 setAdding(false);
-                if (name) update((l) => lib.createFolder(l, name));
+                if (name) mutate({ kind: 'createFolder', id: newFolderId(), name });
               }}
             />
           </li>
@@ -105,8 +106,9 @@ export function Sidebar({ library, pubs, pubsById, view, onView, update, fetched
       </ol>
 
       <footer className="sidebar-foot">
+        <SyncStatus doc={sync} />
         <div className="synced">
-          <span>Synced {formatAgo(fetchedAt)}</span>
+          <span>Subscriptions updated {formatAgo(fetchedAt)}</span>
           <button
             className="icon-button small"
             title="Reload subscriptions from Substack"
@@ -138,6 +140,21 @@ export function Sidebar({ library, pubs, pubsById, view, onView, update, fetched
         {importError && <p className="foot-error">{importError}</p>}
       </footer>
     </nav>
+  );
+}
+
+function SyncStatus({ doc }: { doc: LibraryDoc }) {
+  if (doc.syncError) {
+    return (
+      <p className="sync-status error" role="status" title={doc.syncError}>
+        Folder sync delayed. Your changes are saved in this browser and will sync when Chrome allows.
+      </p>
+    );
+  }
+  return (
+    <p className="sync-status" role="status">
+      {doc.dirty ? 'Saving folders…' : 'Folders saved'}
+    </p>
   );
 }
 

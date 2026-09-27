@@ -126,6 +126,8 @@ a { color: inherit; }
 .sidebar .icon-button { color: var(--rack-muted); }
 .sidebar .icon-button:hover { background: var(--rack-raised); color: #fff; }
 .foot-error { color: #f3a39d; margin: 0; }
+.sync-status { margin: 0; font-family: var(--mono); color: var(--rack-muted); }
+.sync-status.error { color: #f3c77a; font-family: var(--body); line-height: 1.35; }
 
 /* ── Main header ───────────────────────────────────────────────────────── */
 .main-head { position: sticky; top: 0; z-index: 5; background: var(--table); padding: 28px 0 16px; margin-bottom: 4px; }

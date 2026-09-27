@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import * as lib from '@/lib/library';
-import type { Library } from '@/lib/library';
+import { newFolderId, type Library, type LibraryOp } from '@/lib/library';
 import { thumb, type Publication } from '@/lib/substack';
 import { Icon } from './icons';
 import { PUB_DRAG } from './Sidebar';
@@ -8,12 +7,12 @@ import { PUB_DRAG } from './Sidebar';
 interface Props {
   pubs: Publication[];
   library: Library;
-  update: (fn: (l: Library) => Library) => void;
+  mutate: (...ops: LibraryOp[]) => void;
   /** The folder being viewed, if any. Its chip is omitted since it's implied. */
   currentFolderId: string | null;
 }
 
-export function PublicationList({ pubs, library, update, currentFolderId }: Props) {
+export function PublicationList({ pubs, library, mutate, currentFolderId }: Props) {
   const [pickerFor, setPickerFor] = useState<number | null>(null);
   const pinned = new Set(library.pinned);
 
@@ -60,7 +59,7 @@ export function PublicationList({ pubs, library, update, currentFolderId }: Prop
                       <button
                         title={`Remove from ${f.name}`}
                         aria-label={`Remove ${pub.name} from ${f.name}`}
-                        onClick={() => update((l) => lib.removeFromFolder(l, f.id, pub.id))}
+                        onClick={() => mutate({ kind: 'removeFromFolder', folderId: f.id, pubId: pub.id })}
                       >
                         <Icon name="x" size={11} />
                       </button>
@@ -69,7 +68,7 @@ export function PublicationList({ pubs, library, update, currentFolderId }: Prop
               </div>
               <div className="pub-actions">
                 {currentFolderId && (
-                  <button className="text-button" onClick={() => update((l) => lib.removeFromFolder(l, currentFolderId, pub.id))}>
+                  <button className="text-button" onClick={() => mutate({ kind: 'removeFromFolder', folderId: currentFolderId, pubId: pub.id })}>
                     Remove
                   </button>
                 )}
@@ -82,14 +81,14 @@ export function PublicationList({ pubs, library, update, currentFolderId }: Prop
                     <Icon name="folder" size={14} /> Folders
                   </button>
                   {pickerFor === pub.id && (
-                    <FolderPicker pubId={pub.id} library={library} update={update} onClose={() => setPickerFor(null)} />
+                    <FolderPicker pubId={pub.id} library={library} mutate={mutate} onClose={() => setPickerFor(null)} />
                   )}
                 </div>
                 <button
                   className={`pin-toggle${isPinned ? ' on' : ''}`}
                   aria-pressed={isPinned}
                   title={isPinned ? 'Unpin' : 'Pin to top'}
-                  onClick={() => update((l) => lib.togglePin(l, pub.id))}
+                  onClick={() => mutate({ kind: 'setPinned', pubId: pub.id, pinned: !isPinned })}
                 >
                   <Icon name="pin" />
                 </button>
@@ -102,7 +101,7 @@ export function PublicationList({ pubs, library, update, currentFolderId }: Prop
   );
 }
 
-function FolderPicker({ pubId, library, update, onClose }: { pubId: number; library: Library; update: Props['update']; onClose: () => void }) {
+function FolderPicker({ pubId, library, mutate, onClose }: { pubId: number; library: Library; mutate: Props['mutate']; onClose: () => void }) {
   const ref = useRef<HTMLDivElement>(null);
   const [name, setName] = useState('');
 
@@ -128,7 +127,7 @@ function FolderPicker({ pubId, library, update, onClose }: { pubId: number; libr
             <input
               type="checkbox"
               checked={checked}
-              onChange={() => update((l) => (checked ? lib.removeFromFolder(l, f.id, pubId) : lib.addToFolder(l, f.id, pubId)))}
+              onChange={() => mutate({ kind: checked ? 'removeFromFolder' : 'addToFolder', folderId: f.id, pubId })}
             />
             <span>{f.name}</span>
           </label>
@@ -139,10 +138,8 @@ function FolderPicker({ pubId, library, update, onClose }: { pubId: number; libr
         onSubmit={(e) => {
           e.preventDefault();
           if (!name.trim()) return;
-          update((l) => {
-            const withFolder = lib.createFolder(l, name);
-            return lib.addToFolder(withFolder, withFolder.folders.at(-1)!.id, pubId);
-          });
+          const id = newFolderId();
+          mutate({ kind: 'createFolder', id, name }, { kind: 'addToFolder', folderId: id, pubId });
           setName('');
         }}
       >

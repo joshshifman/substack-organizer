@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { cachedSubscriptions, recentPosts, refreshSubscriptions } from '@/lib/cache';
-import * as lib from '@/lib/library';
-import { emptyLibrary, loadLibrary, onLibraryChanged, saveLibrary, unsortedIds, type Library } from '@/lib/library';
+import { emptyLibrary, unsortedIds, type LibraryOp } from '@/lib/library';
+import { getLibraryDoc, mutateLibrary, watchLibraryDoc } from '@/lib/library-client';
+import type { LibraryDoc } from '@/lib/store';
 import { NotSignedInError, type Post, type Publication } from '@/lib/substack';
 import { Icon } from './icons';
 import { Sidebar } from './Sidebar';
@@ -27,36 +28,41 @@ type SubsState =
 
 export default function App() {
   const [subs, setSubs] = useState<SubsState>({ status: 'loading' });
-  const [library, setLibrary] = useState<Library>(emptyLibrary);
-  const [libraryLoaded, setLibraryLoaded] = useState(false);
+  const [doc, setDoc] = useState<LibraryDoc | null>(null);
+  const [libraryError, setLibraryError] = useState<string | null>(null);
   const [view, setView] = useState<View>(loadView);
   const [mode, setMode] = useState<Mode>('posts');
   const [query, setQuery] = useState('');
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  // Library: load once and follow edits made in other tabs.
+  // Library: owned by the background worker. Every version arrives through
+  // watchLibraryDoc (or as a reply); older versions arriving late are ignored.
+  const acceptDoc = useCallback((next: LibraryDoc) => {
+    setDoc((prev) => (!prev || next.version >= prev.version ? next : prev));
+  }, []);
+  const loadLibrary = useCallback(() => {
+    setLibraryError(null);
+    getLibraryDoc().then(acceptDoc, (err: Error) => setLibraryError(err.message));
+  }, [acceptDoc]);
   useEffect(() => {
-    const reload = () =>
-      loadLibrary().then((l) => {
-        setLibrary(l);
-        setLibraryLoaded(true);
-      });
-    reload();
-    return onLibraryChanged(reload);
-  }, []);
+    const unwatch = watchLibraryDoc(acceptDoc); // Subscribe first so no update is missed.
+    loadLibrary();
+    return unwatch;
+  }, [acceptDoc, loadLibrary]);
+  const library = doc?.library ?? emptyLibrary;
 
-  // The ref lets rapid successive edits build on each other without waiting for a render.
-  const libraryRef = useRef(library);
-  libraryRef.current = library;
-  const update = useCallback((fn: (l: Library) => Library) => {
-    const next = fn(libraryRef.current);
-    libraryRef.current = next;
-    setLibrary(next);
-    saveLibrary(next).then(
-      () => setSaveError(null),
-      (err) => setSaveError(`Couldn't save your folders: ${err.message}`),
-    );
-  }, []);
+  const mutate = useCallback(
+    (...ops: LibraryOp[]) => {
+      mutateLibrary(ops).then(
+        (next) => {
+          acceptDoc(next);
+          setSaveError(null);
+        },
+        (err: Error) => setSaveError(`Couldn't save that change: ${err.message}`),
+      );
+    },
+    [acceptDoc],
+  );
 
   // Subscriptions: show the cache immediately, then refresh from Substack.
   const syncSubscriptions = useCallback(async () => {
@@ -88,8 +94,8 @@ export default function App() {
   // A folder that was deleted (maybe in another tab) falls back to Pinned.
   const folder = view.kind === 'folder' ? library.folders.find((f) => f.id === view.id) : undefined;
   useEffect(() => {
-    if (view.kind === 'folder' && !folder && libraryLoaded) setView({ kind: 'pinned' });
-  }, [view, folder, libraryLoaded]);
+    if (view.kind === 'folder' && !folder && doc) setView({ kind: 'pinned' });
+  }, [view, folder, doc]);
 
   const viewPubs = useMemo(() => {
     const pick = (ids: number[]) => ids.flatMap((id) => pubsById.get(id) ?? []);
@@ -154,6 +160,14 @@ export default function App() {
       </FullPage>
     );
   }
+  if (libraryError) {
+    return (
+      <FullPage title="Couldn't load your folders">
+        <p>{libraryError}</p>
+        <button className="button primary" onClick={loadLibrary}>Try again</button>
+      </FullPage>
+    );
+  }
   if (subs.status === 'error') {
     return (
       <FullPage title="Couldn't load your subscriptions">
@@ -165,6 +179,9 @@ export default function App() {
     );
   }
 
+  // Editing waits for the saved library, so nothing can be built on an empty stand-in.
+  if (!doc) return <FullPage title="Loading your folders…" />;
+
   return (
     <div className="app">
       <Sidebar
@@ -173,7 +190,8 @@ export default function App() {
         pubsById={pubsById}
         view={view}
         onView={(v) => { setView(v); setMode('posts'); setQuery(''); }}
-        update={update}
+        mutate={mutate}
+        sync={doc}
         fetchedAt={subs.fetchedAt}
         onRefresh={syncSubscriptions}
       />
@@ -193,10 +211,10 @@ export default function App() {
             {view.kind === 'folder' && folder ? (
               <FolderTitle
                 name={folder.name}
-                onRename={(name) => update((l) => lib.renameFolder(l, folder.id, name))}
+                onRename={(name) => mutate({ kind: 'renameFolder', folderId: folder.id, name })}
                 onDelete={() => {
                   if (confirm(`Delete the folder “${folder.name}”? The publications stay subscribed.`)) {
-                    update((l) => lib.deleteFolder(l, folder.id));
+                    mutate({ kind: 'deleteFolder', folderId: folder.id });
                     setView({ kind: 'pinned' });
                   }
                 }}
@@ -247,7 +265,7 @@ export default function App() {
           <PublicationList
             pubs={visiblePubs}
             library={library}
-            update={update}
+            mutate={mutate}
             currentFolderId={view.kind === 'folder' ? view.id : null}
           />
         )}

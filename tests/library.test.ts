@@ -1,78 +1,73 @@
-import { beforeEach, describe, expect, it } from 'vitest';
-import { fakeBrowser } from 'wxt/testing/fake-browser';
-import * as lib from '@/lib/library';
+import { describe, expect, it } from 'vitest';
+import { applyOps, emptyLibrary, parseLibrary, unsortedIds, type LibraryOp } from '@/lib/library';
 
-const withFolders = (...names: string[]) => names.reduce(lib.createFolder, lib.emptyLibrary);
+const create = (id: string, name = id): LibraryOp => ({ kind: 'createFolder', id, name });
+const run = (...ops: LibraryOp[]) => applyOps(emptyLibrary, ops);
 
-describe('library operations', () => {
+describe('library ops', () => {
   it('creates, renames and deletes folders', () => {
-    let l = withFolders('Tech', ' Politics ');
+    let l = run(create('a', 'Tech'), create('b', ' Politics '));
     expect(l.folders.map((f) => f.name)).toEqual(['Tech', 'Politics']);
-    l = lib.renameFolder(l, l.folders[0]!.id, 'AI');
-    expect(l.folders[0]!.name).toBe('AI');
-    l = lib.deleteFolder(l, l.folders[0]!.id);
-    expect(l.folders.map((f) => f.name)).toEqual(['Politics']);
+    l = applyOps(l, [{ kind: 'renameFolder', folderId: 'a', name: 'AI' }, { kind: 'deleteFolder', folderId: 'b' }]);
+    expect(l.folders).toEqual([{ id: 'a', name: 'AI', pubIds: [] }]);
+  });
+
+  it('rejects empty folder names and ignores a repeated create', () => {
+    expect(() => run(create('a', '   '))).toThrow(/can’t be empty/);
+    expect(run(create('a', 'One'), create('a', 'Two')).folders.map((f) => f.name)).toEqual(['One']);
   });
 
   it('reorders folders and clamps the target index', () => {
-    const l = withFolders('A', 'B', 'C');
-    const [a, , c] = l.folders;
-    expect(lib.moveFolder(l, c!.id, 0).folders.map((f) => f.name)).toEqual(['C', 'A', 'B']);
-    expect(lib.moveFolder(l, a!.id, 99).folders.map((f) => f.name)).toEqual(['B', 'C', 'A']);
-    expect(lib.moveFolder(l, 'missing', 0)).toBe(l);
+    const l = run(create('a'), create('b'), create('c'));
+    const order = (op: LibraryOp) => applyOps(l, [op]).folders.map((f) => f.id);
+    expect(order({ kind: 'moveFolder', folderId: 'c', toIndex: 0 })).toEqual(['c', 'a', 'b']);
+    expect(order({ kind: 'moveFolder', folderId: 'a', toIndex: 99 })).toEqual(['b', 'c', 'a']);
+    expect(applyOps(l, [{ kind: 'moveFolder', folderId: 'missing', toIndex: 0 }])).toBe(l);
   });
 
   it('lets a publication live in several folders without duplicates', () => {
-    let l = withFolders('A', 'B');
-    const [a, b] = l.folders.map((f) => f.id) as [string, string];
-    l = lib.addToFolder(l, a, 1);
-    l = lib.addToFolder(l, a, 1);
-    l = lib.addToFolder(l, b, 1);
+    let l = run(create('a'), create('b'));
+    l = applyOps(l, [
+      { kind: 'addToFolder', folderId: 'a', pubId: 1 },
+      { kind: 'addToFolder', folderId: 'a', pubId: 1 },
+      { kind: 'addToFolder', folderId: 'b', pubId: 1 },
+    ]);
     expect(l.folders.map((f) => f.pubIds)).toEqual([[1], [1]]);
-    l = lib.removeFromFolder(l, a, 1);
+    l = applyOps(l, [{ kind: 'removeFromFolder', folderId: 'a', pubId: 1 }]);
     expect(l.folders.map((f) => f.pubIds)).toEqual([[], [1]]);
   });
 
-  it('toggles pins and computes unsorted publications', () => {
-    let l = lib.togglePin(withFolders('A'), 7);
+  it('pins idempotently and computes unsorted publications', () => {
+    const pin = (pubId: number, pinned: boolean): LibraryOp => ({ kind: 'setPinned', pubId, pinned });
+    let l = run(pin(7, true), pin(7, true));
     expect(l.pinned).toEqual([7]);
-    expect(lib.togglePin(l, 7).pinned).toEqual([]);
-    l = lib.addToFolder(l, l.folders[0]!.id, 2);
-    expect(lib.unsortedIds(l, [1, 2, 3])).toEqual([1, 3]);
-  });
-
-  it('validates imported files', () => {
-    const l = lib.addToFolder(withFolders('A'), withFolders('A').folders[0]!.id, 1);
-    expect(lib.parseLibrary(JSON.parse(JSON.stringify(l)))).toEqual(l);
-    expect(() => lib.parseLibrary({ folders: 'nope', pinned: [] })).toThrow(/not a Substack Organizer export/);
-    expect(() => lib.parseLibrary({ folders: [{ name: 'X', pubIds: ['a'] }], pinned: [] })).toThrow(/folder/);
+    expect(applyOps(l, [pin(7, false), pin(7, false)]).pinned).toEqual([]);
+    l = applyOps(l, [create('a'), { kind: 'addToFolder', folderId: 'a', pubId: 2 }]);
+    expect(unsortedIds(l, [1, 2, 3])).toEqual([1, 3]);
   });
 });
 
-describe('library storage', () => {
-  beforeEach(() => fakeBrowser.reset());
-
-  it('round-trips through chrome.storage.sync with one key per folder', async () => {
-    let l = withFolders('A', 'B');
-    l = lib.addToFolder(l, l.folders[1]!.id, 42);
-    l = lib.togglePin(l, 42);
-    await lib.saveLibrary(l);
-
-    const stored = await fakeBrowser.storage.sync.get(null);
-    expect(Object.keys(stored).sort()).toEqual(['meta', ...l.folders.map((f) => `folder:${f.id}`)].sort());
-    expect(await lib.loadLibrary()).toEqual(l);
+describe('parseLibrary (imports)', () => {
+  it('round-trips an export', () => {
+    const l = run(create('a', 'A'), { kind: 'addToFolder', folderId: 'a', pubId: 1 }, { kind: 'setPinned', pubId: 1, pinned: true });
+    expect(parseLibrary(JSON.parse(JSON.stringify(l)))).toEqual(l);
   });
 
-  it('removes keys for deleted folders', async () => {
-    const l = withFolders('A', 'B');
-    await lib.saveLibrary(l);
-    await lib.saveLibrary(lib.deleteFolder(l, l.folders[0]!.id));
-    const stored = await fakeBrowser.storage.sync.get(null);
-    expect(Object.keys(stored)).not.toContain(`folder:${l.folders[0]!.id}`);
-    expect((await lib.loadLibrary()).folders.map((f) => f.name)).toEqual(['B']);
+  it('rejects files that are not exports', () => {
+    expect(() => parseLibrary({ folders: 'nope', pinned: [] })).toThrow(/not a Substack Organizer export/);
+    expect(() => parseLibrary({ folders: [{ name: 'X', pubIds: ['a'] }], pinned: [] })).toThrow(/folder/);
+    expect(() => parseLibrary({ folders: [{ name: 'X', pubIds: [-1] }], pinned: [] })).toThrow(/folder/);
   });
 
-  it('loads an empty library on first run', async () => {
-    expect(await lib.loadLibrary()).toEqual(lib.emptyLibrary);
+  it('rejects duplicate folder ids instead of merging them', () => {
+    const file = { folders: [{ id: 'x', name: 'One', pubIds: [] }, { id: 'x', name: 'Two', pubIds: [] }], pinned: [] };
+    expect(() => parseLibrary(file)).toThrow(/two folders with the id “x”/);
+  });
+
+  it('removes duplicate publications and pins', () => {
+    expect(parseLibrary({ folders: [{ id: 'a', name: 'A', pubIds: [1, 1, 2] }], pinned: [3, 3] })).toEqual({
+      folders: [{ id: 'a', name: 'A', pubIds: [1, 2] }],
+      pinned: [3],
+    });
   });
 });

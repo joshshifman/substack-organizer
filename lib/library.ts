@@ -1,6 +1,6 @@
 // The user's organization: folders of publications plus pinned publications.
 // This is the only state the extension owns; everything else comes from Substack.
-// Operations are pure (Library in, Library out); storage is at the bottom.
+// Everything here is pure. Persistence lives in store.ts (background worker).
 
 export interface Folder {
   id: string;
@@ -17,45 +17,57 @@ export interface Library {
 
 export const emptyLibrary: Library = { folders: [], pinned: [] };
 
-const newId = () => Math.random().toString(36).slice(2, 10);
+export const MAX_FOLDER_NAME = 80;
 
-export function createFolder(lib: Library, name: string): Library {
-  return { ...lib, folders: [...lib.folders, { id: newId(), name: name.trim(), pubIds: [] }] };
+export const newFolderId = () => Math.random().toString(36).slice(2, 10);
+
+/**
+ * An edit, sent from the reader to the background worker. Ops are applied to the
+ * latest library in order, so they describe intent ("pin 42") rather than a new
+ * snapshot, and applying one twice has the same effect as once.
+ */
+export type LibraryOp =
+  | { kind: 'createFolder'; id: string; name: string }
+  | { kind: 'renameFolder'; folderId: string; name: string }
+  | { kind: 'deleteFolder'; folderId: string }
+  | { kind: 'moveFolder'; folderId: string; toIndex: number }
+  | { kind: 'addToFolder'; folderId: string; pubId: number }
+  | { kind: 'removeFromFolder'; folderId: string; pubId: number }
+  | { kind: 'setPinned'; pubId: number; pinned: boolean }
+  | { kind: 'replace'; library: Library };
+
+export function applyOp(lib: Library, op: LibraryOp): Library {
+  switch (op.kind) {
+    case 'createFolder': {
+      if (lib.folders.some((f) => f.id === op.id)) return lib;
+      return { ...lib, folders: [...lib.folders, { id: op.id, name: cleanName(op.name), pubIds: [] }] };
+    }
+    case 'renameFolder':
+      return mapFolder(lib, op.folderId, (f) => ({ ...f, name: cleanName(op.name) }));
+    case 'deleteFolder':
+      return { ...lib, folders: lib.folders.filter((f) => f.id !== op.folderId) };
+    case 'moveFolder': {
+      const folder = lib.folders.find((f) => f.id === op.folderId);
+      if (!folder) return lib;
+      const folders = lib.folders.filter((f) => f !== folder);
+      folders.splice(Math.max(0, Math.min(op.toIndex, folders.length)), 0, folder);
+      return { ...lib, folders };
+    }
+    case 'addToFolder':
+      return mapFolder(lib, op.folderId, (f) => (f.pubIds.includes(op.pubId) ? f : { ...f, pubIds: [...f.pubIds, op.pubId] }));
+    case 'removeFromFolder':
+      return mapFolder(lib, op.folderId, (f) => ({ ...f, pubIds: f.pubIds.filter((id) => id !== op.pubId) }));
+    case 'setPinned': {
+      const has = lib.pinned.includes(op.pubId);
+      if (has === op.pinned) return lib;
+      return { ...lib, pinned: op.pinned ? [...lib.pinned, op.pubId] : lib.pinned.filter((id) => id !== op.pubId) };
+    }
+    case 'replace':
+      return parseLibrary(op.library);
+  }
 }
 
-export function renameFolder(lib: Library, folderId: string, name: string): Library {
-  return mapFolder(lib, folderId, (f) => ({ ...f, name: name.trim() }));
-}
-
-export function deleteFolder(lib: Library, folderId: string): Library {
-  return { ...lib, folders: lib.folders.filter((f) => f.id !== folderId) };
-}
-
-/** Moves a folder to `toIndex` in the display order. */
-export function moveFolder(lib: Library, folderId: string, toIndex: number): Library {
-  const folder = lib.folders.find((f) => f.id === folderId);
-  if (!folder) return lib;
-  const folders = lib.folders.filter((f) => f !== folder);
-  folders.splice(Math.max(0, Math.min(toIndex, folders.length)), 0, folder);
-  return { ...lib, folders };
-}
-
-export function addToFolder(lib: Library, folderId: string, pubId: number): Library {
-  return mapFolder(lib, folderId, (f) =>
-    f.pubIds.includes(pubId) ? f : { ...f, pubIds: [...f.pubIds, pubId] },
-  );
-}
-
-export function removeFromFolder(lib: Library, folderId: string, pubId: number): Library {
-  return mapFolder(lib, folderId, (f) => ({ ...f, pubIds: f.pubIds.filter((id) => id !== pubId) }));
-}
-
-export function togglePin(lib: Library, pubId: number): Library {
-  const pinned = lib.pinned.includes(pubId)
-    ? lib.pinned.filter((id) => id !== pubId)
-    : [...lib.pinned, pubId];
-  return { ...lib, pinned };
-}
+export const applyOps = (lib: Library, ops: LibraryOp[]) => ops.reduce(applyOp, lib);
 
 /** Publications that are in no folder. */
 export function unsortedIds(lib: Library, allIds: number[]): number[] {
@@ -67,61 +79,36 @@ function mapFolder(lib: Library, folderId: string, fn: (f: Folder) => Folder): L
   return { ...lib, folders: lib.folders.map((f) => (f.id === folderId ? fn(f) : f)) };
 }
 
-/** Validates untrusted JSON (an import file) into a Library, or throws. */
+function cleanName(name: string): string {
+  const trimmed = name.trim().slice(0, MAX_FOLDER_NAME);
+  if (!trimmed) throw new Error('Folder names can’t be empty.');
+  return trimmed;
+}
+
+const isPubId = (n: unknown): n is number => Number.isSafeInteger(n) && (n as number) > 0;
+const uniqueIds = (xs: unknown): number[] | null =>
+  Array.isArray(xs) && xs.every(isPubId) ? [...new Set(xs)] : null;
+
+/**
+ * Validates untrusted JSON (an import file) into a Library, or throws. Folder ids
+ * become storage keys, so duplicates are rejected rather than silently merged.
+ */
 export function parseLibrary(value: unknown): Library {
   const v = value as any;
-  const isIds = (x: unknown) => Array.isArray(x) && x.every((n) => Number.isInteger(n));
-  if (!v || !Array.isArray(v.folders) || !isIds(v.pinned)) {
+  const pinned = uniqueIds(v?.pinned);
+  if (!v || !Array.isArray(v.folders) || !pinned) {
     throw new Error('This file is not a Substack Organizer export.');
   }
-  const folders = v.folders.map((f: any) => {
-    if (typeof f?.name !== 'string' || !isIds(f.pubIds)) {
+  const seen = new Set<string>();
+  const folders = v.folders.map((f: any): Folder => {
+    const pubIds = uniqueIds(f?.pubIds);
+    if (typeof f?.name !== 'string' || !f.name.trim() || !pubIds) {
       throw new Error('This file has a folder without a name or publication list.');
     }
-    return { id: typeof f.id === 'string' ? f.id : newId(), name: f.name, pubIds: f.pubIds };
+    const id = typeof f.id === 'string' && /^[a-z0-9]{1,32}$/i.test(f.id) ? f.id : newFolderId();
+    if (seen.has(id)) throw new Error(`This file has two folders with the id “${id}”.`);
+    seen.add(id);
+    return { id, name: cleanName(f.name), pubIds };
   });
-  return { folders, pinned: v.pinned };
-}
-
-// ── Storage ──────────────────────────────────────────────────────────────────
-// chrome.storage.sync follows the user across Chrome installs but caps each key
-// at 8 KB, so each folder gets its own key and `meta` holds order and pins.
-
-const META_KEY = 'meta';
-const folderKey = (id: string) => `folder:${id}`;
-
-interface Meta {
-  v: 1;
-  folderOrder: string[];
-  pinned: number[];
-}
-
-export async function loadLibrary(): Promise<Library> {
-  const all = await browser.storage.sync.get(null);
-  const meta = all[META_KEY] as Meta | undefined;
-  if (!meta) return emptyLibrary;
-  const folders = meta.folderOrder.flatMap((id) => {
-    const stored = all[folderKey(id)] as Omit<Folder, 'id'> | undefined;
-    return stored ? [{ id, name: stored.name, pubIds: stored.pubIds }] : [];
-  });
-  return { folders, pinned: meta.pinned };
-}
-
-export async function saveLibrary(lib: Library): Promise<void> {
-  const meta: Meta = { v: 1, folderOrder: lib.folders.map((f) => f.id), pinned: lib.pinned };
-  const items: Record<string, unknown> = { [META_KEY]: meta };
-  for (const f of lib.folders) items[folderKey(f.id)] = { name: f.name, pubIds: f.pubIds };
-
-  const existing = Object.keys(await browser.storage.sync.get(null));
-  const stale = existing.filter((k) => k.startsWith('folder:') && !(k in items));
-  await browser.storage.sync.set(items);
-  if (stale.length) await browser.storage.sync.remove(stale);
-}
-
-export function onLibraryChanged(callback: () => void): () => void {
-  const listener = (_changes: unknown, area: string) => {
-    if (area === 'sync') callback();
-  };
-  browser.storage.onChanged.addListener(listener);
-  return () => browser.storage.onChanged.removeListener(listener);
+  return { folders, pinned };
 }

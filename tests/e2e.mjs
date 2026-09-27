@@ -21,6 +21,19 @@ const profileSelf = {
   subscriptions: subscriptions.subscriptions.map(({ publication_id, ...s }) => ({ ...s, publication: pubsById.get(publication_id) })),
 };
 
+/** Retries `check` until it stops throwing: edits reach the page asynchronously via the background worker. */
+async function eventually(check, timeout = 5000) {
+  const end = Date.now() + timeout;
+  for (;;) {
+    try {
+      return await check();
+    } catch (err) {
+      if (Date.now() > end) throw err;
+      await new Promise((r) => setTimeout(r, 50));
+    }
+  }
+}
+
 async function launch({ signedIn }) {
   const context = await chromium.launchPersistentContext(mkdtempSync(join(tmpdir(), 'so-e2e-')), {
     channel: 'chromium',
@@ -85,7 +98,7 @@ const pubsWithPosts = subscriptions.publications
 
   // Pin three publications.
   for (const name of pubsWithPosts.slice(0, 3)) await pubRow(name).getByRole('button', { name: 'Pin to top' }).click();
-  assert.equal(await page.locator('.nav-item', { hasText: 'Pinned' }).locator('.nav-count').innerText(), '3');
+  await eventually(async () => assert.equal(await page.locator('.nav-item', { hasText: 'Pinned' }).locator('.nav-count').innerText(), '3'));
   console.log('✓ pinning updates the Pinned count');
 
   // Create a folder from the sidebar.
@@ -98,10 +111,10 @@ const pubsWithPosts = subscriptions.publications
   // File one publication with the picker, another by dragging onto the folder.
   const [picked, dragged, viaPickerNew] = pubsWithPosts.slice(3, 6);
   await pubRow(picked).getByRole('button', { name: 'Folders' }).click();
-  await page.getByRole('dialog', { name: 'Choose folders' }).getByLabel('Must read').check();
+  await page.getByRole('dialog', { name: 'Choose folders' }).getByLabel('Must read').click();
   await page.keyboard.press('Escape');
   await pubRow(dragged).dragTo(slot);
-  assert.equal(await slot.locator('.nav-count').innerText(), '2');
+  await eventually(async () => assert.equal(await slot.locator('.nav-count').innerText(), '2'));
   const withLogo = subscriptions.publications.filter((p) => [picked, dragged].includes(p.name) && p.logo_url).length;
   assert.equal(await slot.locator('.logo-stack img').count(), withLogo);
   console.log('✓ filing by picker and by drag-and-drop');
@@ -112,12 +125,12 @@ const pubsWithPosts = subscriptions.publications
   await page.keyboard.press('Enter');
   await page.keyboard.press('Escape');
   await page.locator('.folder-slot', { hasText: 'Economics' }).waitFor();
-  assert.ok(await pubRow(viaPickerNew).locator('.chip', { hasText: 'Economics' }).isVisible());
+  await pubRow(viaPickerNew).locator('.chip', { hasText: 'Economics' }).waitFor();
   console.log('✓ creating a folder from the picker files the publication into it');
 
   // Reorder: drag Economics above Must read.
   await page.locator('.folder-slot', { hasText: 'Economics' }).dragTo(slot);
-  assert.deepEqual(await page.locator('.folder-slot .nav-label').allInnerTexts(), ['Economics', 'Must read']);
+  await eventually(async () => assert.deepEqual(await page.locator('.folder-slot .nav-label').allInnerTexts(), ['Economics', 'Must read']));
   console.log('✓ folder reordering');
   await page.screenshot({ path: join(shots, '3-all-publications.png') });
 
@@ -157,7 +170,7 @@ const pubsWithPosts = subscriptions.publications
   page.once('dialog', (d) => d.accept());
   await page.getByRole('button', { name: 'Delete' }).click();
   await page.getByRole('heading', { name: 'Pinned' }).waitFor();
-  assert.deepEqual(await page.locator('.folder-slot .nav-label').allInnerTexts(), ['Economics']);
+  await eventually(async () => assert.deepEqual(await page.locator('.folder-slot .nav-label').allInnerTexts(), ['Economics']));
   console.log('✓ rename and delete');
 
   // Filtering.
@@ -166,6 +179,38 @@ const pubsWithPosts = subscriptions.publications
   await page.getByPlaceholder('Filter publications').fill(pubsWithPosts[0].slice(0, 6));
   assert.ok((await page.locator('.pub').count()) < subscriptions.publications.length);
   console.log('✓ filter');
+
+  // Two reader tabs editing at the same moment: both edits survive, in both tabs.
+  const page2 = await context.newPage();
+  page2.on('pageerror', (e) => errors.push(e.message));
+  await page2.goto(page.url());
+  await page2.locator('.nav-item', { hasText: 'Pinned' }).waitFor();
+  const unpinned = subscriptions.publications.filter((p) => !pubsWithPosts.slice(0, 3).includes(p.name)).slice(0, 2);
+  const pinVia = (p, pubId) =>
+    p.evaluate((id) => chrome.runtime.sendMessage({ type: 'library/mutate', ops: [{ kind: 'setPinned', pubId: id, pinned: true }] }), pubId);
+  await Promise.all([pinVia(page, unpinned[0].id), pinVia(page2, unpinned[1].id)]);
+  for (const p of [page, page2]) {
+    await eventually(async () => assert.equal(await p.locator('.nav-item', { hasText: 'Pinned' }).locator('.nav-count').innerText(), '5'));
+  }
+  console.log('✓ simultaneous edits from two tabs both survive');
+  await page2.close();
+
+  // Edits reach chrome.storage.sync after a short pause.
+  await eventually(async () => {
+    const sync = await page.evaluate(() => chrome.storage.sync.get(null));
+    assert.equal(sync.meta?.pinned.length, 5);
+    assert.deepEqual(sync.meta.folderOrder.map((id) => sync[`folder:${id}`].name), ['Economics']);
+  }, 8000);
+  await page.getByText('Folders saved').waitFor();
+  console.log('✓ folders and pins sync to chrome.storage.sync');
+
+  // An import too big for sync storage is refused and changes nothing.
+  const big = { folders: [{ id: 'big', name: 'Everything', pubIds: Array.from({ length: 1500 }, (_, i) => 5_000_000 + i) }], pinned: [] };
+  page.once('dialog', (d) => d.accept());
+  await page.locator('input[type=file]').setInputFiles({ name: 'big.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(big)) });
+  await page.getByText('“Everything” is full').waitFor();
+  assert.deepEqual(await page.locator('.folder-slot .nav-label').allInnerTexts(), ['Economics']);
+  console.log('✓ an import too large to sync is refused with a clear message');
 
   assert.deepEqual(errors, [], `page errors: ${errors.join('\n')}`);
   await context.close();
