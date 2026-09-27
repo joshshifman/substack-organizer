@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { acceptNotice, cachedSubscriptions, clearSubstackCache, noticeAccepted, recentPosts, refreshSubscriptions, type FeedResult } from '@/lib/cache';
-import { FULL_NAME, PRIVACY_URL } from '@/lib/brand';
+import { APP_NAME, PRIVACY_URL } from '@/lib/brand';
 import { emptyLibrary, unsortedIds, type LibraryOp } from '@/lib/library';
 import { getLibraryDoc, mutateLibrary, watchLibraryDoc } from '@/lib/library-client';
 import type { LibraryDoc } from '@/lib/store';
@@ -186,7 +186,7 @@ export default function App() {
   if (notice === 'unknown') return <FullPage title="Loading…" />;
   if (notice === 'show') {
     return (
-      <FullPage title={`Before ${FULL_NAME} loads your subscriptions`}>
+      <FullPage title={`Before ${APP_NAME} loads your subscriptions`}>
         <ul className="notice-list">
           <li>
             <strong>What it reads.</strong> Using your Substack login in this browser, it reads the list of publications you subscribe to

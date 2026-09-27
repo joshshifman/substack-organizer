@@ -2,7 +2,7 @@
 
 _Last updated: September 27, 2026_
 
-This policy covers the Substack Organizer browser extension ("the extension"). The extension is an independent project. It is not made, endorsed or supported by Substack.
+This policy covers the Subscription Organizer for Substack browser extension ("the extension"). The extension is an independent project. It is not made, endorsed or supported by Substack.
 
 ## Summary
 

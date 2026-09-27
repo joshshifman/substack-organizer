@@ -2,13 +2,13 @@
 // `pnpm build && pnpm store-assets` to refresh the store images.
 
 /** Short name, used in the sidebar wordmark. */
-export const APP_NAME = 'Substack Organizer';
+export const APP_NAME = 'Subscription Organizer';
 
 /**
  * Store and manifest name. Naming the product first and Substack after ("X for
  * Substack") avoids implying the extension is made by Substack.
  */
-export const FULL_NAME = APP_NAME;
+export const FULL_NAME = `${APP_NAME} for Substack`;
 
 /** Manifest description: 132 characters at most. */
 export const DESCRIPTION = 'Sort your Substack subscriptions into folders and pin the ones you read most.';

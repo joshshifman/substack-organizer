@@ -8,7 +8,7 @@ import { chromium } from 'playwright';
 import { mkdirSync, mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { DESCRIPTION, FULL_NAME } from '../lib/brand.ts';
+import { APP_NAME, DESCRIPTION, FULL_NAME } from '../lib/brand.ts';
 
 const out = resolve('store');
 mkdirSync(out, { recursive: true });
@@ -179,10 +179,13 @@ const tagline = 'Folders and pins for your Substack subscriptions';
 const browser = await chromium.launch();
 const promo = await browser.newPage({ viewport: { width: 440, height: 280 } });
 await promo.setContent(`<style>${css}</style>
-  <div style="height:280px;display:flex;flex-direction:column;justify-content:center;gap:16px;padding:0 36px;box-sizing:border-box">
-    <img src="${icon}" width="72" height="72" style="border-radius:16px">
-    <h1 style="font-size:${FULL_NAME.length > 20 ? 30 : 36}px">${FULL_NAME}</h1>
-    <p style="font-size:16px;line-height:1.35;max-width:320px">${tagline}</p>
+  <div style="height:280px;display:flex;flex-direction:column;justify-content:center;gap:14px;padding:0 36px;box-sizing:border-box">
+    <img src="${icon}" width="56" height="56" style="border-radius:13px">
+    <div>
+      <h1 style="font-size:34px">${APP_NAME}</h1>
+      <div style="font:600 17px Display;color:#c3cce0;margin-top:6px">for Substack</div>
+    </div>
+    <p style="font-size:15px;line-height:1.35;max-width:340px">${tagline}</p>
   </div>`);
 await promo.evaluate(() => document.fonts.ready);
 await promo.screenshot({ path: join(out, 'promo-small.png') });
@@ -192,7 +195,10 @@ await marquee.setContent(`<style>${css}</style>
   <div style="height:560px;display:flex;align-items:center;gap:56px;padding-left:80px;box-sizing:border-box">
     <div style="width:420px;flex:none;display:flex;flex-direction:column;gap:22px">
       <img src="${icon}" width="88" height="88" style="border-radius:20px">
-      <h1 style="font-size:52px">${FULL_NAME}</h1>
+      <div>
+        <h1 style="font-size:52px">${APP_NAME}</h1>
+        <div style="font:600 24px Display;color:#c3cce0;margin-top:10px">for Substack</div>
+      </div>
       <p style="font-size:20px;line-height:1.4">${DESCRIPTION}</p>
     </div>
     <img src="${shot}" style="width:900px;border-radius:14px;box-shadow:0 24px 60px rgb(0 0 0 / .45);transform:translateY(60px)">

@@ -51,8 +51,9 @@ a { color: inherit; }
   overflow-y: auto;
 }
 .wordmark {
-  font: 700 21px/1 var(--display);
+  font: 700 18px/1 var(--display);
   letter-spacing: -0.02em;
+  white-space: nowrap;
   color: #fff;
   padding: 0 10px 22px;
 }

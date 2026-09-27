@@ -15,7 +15,7 @@ Upload `dist/substack-organizer-0.1.0-chrome.zip`.
 
 ## Store listing tab
 
-**Name** comes from the manifest: Substack Organizer
+**Name** comes from the manifest: Subscription Organizer for Substack
 
 **Summary** (from the manifest, 132 characters max):
 
