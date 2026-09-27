@@ -35,6 +35,7 @@ async function eventually(check, timeout = 5000) {
 }
 
 async function launch({ signedIn }) {
+  const calls = { posts: 0 };
   const context = await chromium.launchPersistentContext(mkdtempSync(join(tmpdir(), 'so-e2e-')), {
     channel: 'chromium',
     headless: true,
@@ -55,6 +56,7 @@ async function launch({ signedIn }) {
     if (url.pathname === '/api/v1/user/profile/self') return route.fulfill({ json: profileSelf });
     if (url.pathname === '/api/v1/subscriptions') return route.fulfill({ json: { subscriptions: [], publications: [] } });
     if (url.pathname === '/api/v1/profile/posts') {
+      calls.posts++;
       return route.fulfill({ json: postsByAuthor[url.searchParams.get('profile_user_id')] ?? { posts: [] } });
     }
     return route.fulfill({ status: 404, json: {} });
@@ -65,7 +67,7 @@ async function launch({ signedIn }) {
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto(`chrome-extension://${extensionId}/reader.html`);
-  return { context, page, errors };
+  return { context, page, errors, calls };
 }
 
 // Publications whose authors have posts in the fixture, so feeds aren't empty.
@@ -84,7 +86,7 @@ const pubsWithPosts = subscriptions.publications
 
 // ── Signed in ────────────────────────────────────────────────────────────────
 {
-  const { context, page, errors } = await launch({ signedIn: true });
+  const { context, page, errors, calls } = await launch({ signedIn: true });
   const pubRow = (name) => page.locator('.pub').filter({ has: page.getByRole('link', { name, exact: true }) });
 
   await page.getByRole('heading', { name: 'Pinned' }).waitFor();
@@ -211,6 +213,27 @@ const pubsWithPosts = subscriptions.publications
   await page.getByText('“Everything” is full').waitFor();
   assert.deepEqual(await page.locator('.folder-slot .nav-label').allInnerTexts(), ['Economics']);
   console.log('✓ an import too large to sync is refused with a clear message');
+
+  // "Check for new posts" refreshes once; later loads go back to the cache.
+  const economics = page.locator('.folder-slot', { hasText: 'Economics' });
+  await economics.click();
+  await page.locator('a.post').first().waitFor();
+  const beforeRefresh = calls.posts;
+  const refresh = page.getByRole('button', { name: 'Check for new posts' });
+  await refresh.click();
+  await eventually(async () => assert.ok(await refresh.isEnabled()));
+  assert.equal(calls.posts, beforeRefresh + 1); // Economics holds one publication.
+  await page.getByRole('tab', { name: 'Publications' }).click();
+  await page.getByRole('tab', { name: 'Latest posts' }).click();
+  await page.locator('a.post').first().waitFor();
+  await page.locator('.nav-item', { hasText: 'Pinned' }).click();
+  await page.locator('a.post').first().waitFor();
+  const afterPinned = calls.posts;
+  await economics.click();
+  await page.locator('a.post').first().waitFor();
+  await page.waitForTimeout(300);
+  assert.equal(calls.posts, afterPinned);
+  console.log('✓ a manual refresh fetches once; switching modes and views afterwards uses the cache');
 
   assert.deepEqual(errors, [], `page errors: ${errors.join('\n')}`);
   await context.close();

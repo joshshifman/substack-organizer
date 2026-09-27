@@ -42,13 +42,75 @@ export function thumb(url: string, width: number, height = width): string {
   return `https://substackcdn.com/image/fetch/w_${width * 2},h_${height * 2},c_fill,f_auto,q_auto:good/${encodeURIComponent(url)}`;
 }
 
-async function getJson(path: string, attempt = 0): Promise<any> {
-  const res = await fetch(`${API}${path}`, { credentials: 'include' });
-  if (res.status === 401 || res.status === 403) throw new NotSignedInError();
-  if (res.status === 429 && attempt < 2) {
-    await new Promise((r) => setTimeout(r, 2000 * (attempt + 1)));
-    return getJson(path, attempt + 1);
+// ── Requests ─────────────────────────────────────────────────────────────────
+// All requests from this page share one small pool, so switching views quickly
+// can't pile up parallel request queues, and a 429 pauses every request, not just
+// the one that got it.
+
+const MAX_CONCURRENT = 4;
+const MAX_RETRIES = 2;
+let active = 0;
+const waiting: Array<() => void> = [];
+let cooldownUntil = 0;
+
+function acquireSlot(signal?: AbortSignal): Promise<() => void> {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) return reject(signal.reason);
+    let released = false;
+    const release = () => {
+      if (released) return;
+      released = true;
+      active--;
+      waiting.shift()?.();
+    };
+    const grant = () => {
+      signal?.removeEventListener('abort', onAbort);
+      active++;
+      resolve(release);
+    };
+    const onAbort = () => {
+      const i = waiting.indexOf(grant);
+      if (i !== -1) waiting.splice(i, 1);
+      reject(signal!.reason);
+    };
+    if (active < MAX_CONCURRENT) return grant();
+    waiting.push(grant);
+    signal?.addEventListener('abort', onAbort, { once: true });
+  });
+}
+
+function sleep(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) return reject(signal.reason);
+    if (ms <= 0) return resolve();
+    const timer = setTimeout(resolve, ms);
+    signal?.addEventListener('abort', () => (clearTimeout(timer), reject(signal.reason)), { once: true });
+  });
+}
+
+/** How long a 429 asks us to wait: Retry-After (seconds or a date), else exponential backoff with jitter. */
+export function retryDelayMs(retryAfter: string | null, attempt: number, now = Date.now()): number {
+  let ms = NaN;
+  if (retryAfter) ms = /^\d+$/.test(retryAfter.trim()) ? Number(retryAfter) * 1000 : Date.parse(retryAfter) - now;
+  if (!Number.isFinite(ms)) ms = 2000 * 2 ** attempt + Math.random() * 500;
+  return Math.min(Math.max(ms, 1000), 60_000);
+}
+
+async function getJson(path: string, signal?: AbortSignal, attempt = 0): Promise<any> {
+  const release = await acquireSlot(signal);
+  let res: Response;
+  try {
+    await sleep(cooldownUntil - Date.now(), signal);
+    res = await fetch(`${API}${path}`, { credentials: 'include', signal });
+  } finally {
+    release();
   }
+  if (res.status === 401 || res.status === 403) throw new NotSignedInError();
+  if (res.status === 429 && attempt < MAX_RETRIES) {
+    cooldownUntil = Math.max(cooldownUntil, Date.now() + retryDelayMs(res.headers.get('retry-after'), attempt));
+    return getJson(path, signal, attempt + 1);
+  }
+  if (res.status === 429) throw new Error('Substack is limiting requests right now. Try again in a minute.');
   if (!res.ok) throw new Error(`Substack returned ${res.status} for ${path}`);
   return res.json();
 }
@@ -118,7 +180,15 @@ export async function fetchSubscriptions(): Promise<Publication[]> {
 export function parsePosts(body: Json, publicationId: number): Post[] {
   const posts: Json[] = Array.isArray(body.posts) ? body.posts : [];
   return posts
-    .filter((p) => p.publication_id === publicationId && p.title)
+    // Malformed entries would break date sorting or produce dead links; skip them.
+    .filter(
+      (p) =>
+        p.publication_id === publicationId &&
+        typeof p.title === 'string' &&
+        typeof p.post_date === 'string' &&
+        !Number.isNaN(Date.parse(p.post_date)) &&
+        /^https?:\/\//.test(p.canonical_url ?? ''),
+    )
     .map((p) => ({
       id: p.id,
       publicationId: p.publication_id,
@@ -136,8 +206,8 @@ export function parsePosts(body: Json, publicationId: number): Post[] {
  * (works for custom-domain publications without extra permissions) and keeps only
  * posts from this publication. Guest posts by other writers are not included.
  */
-export async function fetchRecentPosts(pub: Publication, limit = 6): Promise<Post[]> {
+export async function fetchRecentPosts(pub: Publication, signal?: AbortSignal, limit = 6): Promise<Post[]> {
   if (pub.authorId == null) return [];
-  const body = await getJson(`/profile/posts?profile_user_id=${pub.authorId}&limit=${limit * 2}`);
+  const body = await getJson(`/profile/posts?profile_user_id=${pub.authorId}&limit=${limit * 2}`, signal);
   return parsePosts(body, pub.id).slice(0, limit);
 }

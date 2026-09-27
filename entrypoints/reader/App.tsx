@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { cachedSubscriptions, recentPosts, refreshSubscriptions } from '@/lib/cache';
+import { cachedSubscriptions, recentPosts, refreshSubscriptions, type FeedResult } from '@/lib/cache';
 import { emptyLibrary, unsortedIds, type LibraryOp } from '@/lib/library';
 import { getLibraryDoc, mutateLibrary, watchLibraryDoc } from '@/lib/library-client';
 import type { LibraryDoc } from '@/lib/store';
-import { NotSignedInError, type Post, type Publication } from '@/lib/substack';
+import { NotSignedInError, type Publication } from '@/lib/substack';
 import { Icon } from './icons';
 import { Sidebar } from './Sidebar';
 import { PostList } from './PostList';
@@ -117,20 +117,47 @@ export default function App() {
 
   // Posts for the current view. The feed remembers which publications it was
   // loaded for, so switching views never shows the previous view's posts.
-  const [feed, setFeed] = useState<{ key: string; posts: Post[] } | null>(null);
-  const [postsNonce, setPostsNonce] = useState(0);
-  const feedKey = `${viewPubs.map((p) => p.id).join(',')}#${postsNonce}`;
-  const posts = feed?.key === feedKey ? feed.posts : null;
+  // Normal loads use the 30-minute cache; "Check for new posts" bypasses it once.
+  const [feed, setFeed] = useState<({ key: string } & FeedResult) | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const refreshAbort = useRef<AbortController | null>(null);
+  const feedKey = viewPubs.map((p) => p.id).join(',');
+  const currentFeed = feed?.key === feedKey ? feed : null;
+  const posts = currentFeed?.posts ?? null;
+
+  const loadFeed = useCallback((pubsToLoad: Publication[], key: string, opts: { force?: boolean; signal: AbortSignal }) =>
+    recentPosts(pubsToLoad, opts).then(
+      (result) => setFeed({ key, ...result }),
+      (err) => {
+        if (!opts.signal.aborted) console.warn('Could not load posts', err);
+      },
+    ), []);
+
   useEffect(() => {
     if (effectiveMode !== 'posts' || !feedAllowed) return;
-    let cancelled = false;
-    recentPosts(viewPubs, postsNonce > 0).then((p) => !cancelled && setFeed({ key: feedKey, posts: p }));
+    const controller = new AbortController();
+    loadFeed(viewPubs, feedKey, { signal: controller.signal });
     return () => {
-      cancelled = true;
+      // Leaving the view stops its requests, including a manual refresh.
+      controller.abort();
+      refreshAbort.current?.abort();
     };
-    // viewPubs and postsNonce are captured through feedKey.
+    // viewPubs is captured through feedKey.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [feedKey, effectiveMode]);
+  }, [feedKey, effectiveMode, loadFeed]);
+
+  const refreshFeed = async () => {
+    if (refreshing) return;
+    const controller = new AbortController();
+    refreshAbort.current = controller;
+    setRefreshing(true);
+    // Resolves even when leaving the view aborts it, so the spinner always clears.
+    await loadFeed(viewPubs, feedKey, { force: true, signal: controller.signal });
+    if (refreshAbort.current === controller) {
+      refreshAbort.current = null;
+      setRefreshing(false);
+    }
+  };
 
   const q = query.trim().toLowerCase();
   const visiblePubs = q
@@ -250,7 +277,13 @@ export default function App() {
               />
             </label>
             {effectiveMode === 'posts' && (
-              <button className="icon-button" title="Check for new posts" onClick={() => setPostsNonce((n) => n + 1)}>
+              <button
+                className={`icon-button${refreshing ? ' spinning' : ''}`}
+                title={refreshing ? 'Checking for new posts…' : 'Check for new posts'}
+                aria-label="Check for new posts"
+                disabled={refreshing}
+                onClick={refreshFeed}
+              >
                 <Icon name="refresh" />
               </button>
             )}
@@ -260,7 +293,14 @@ export default function App() {
         {viewPubs.length === 0 ? (
           <EmptyView view={view} onBrowse={() => { setView({ kind: 'all' }); setMode('publications'); }} />
         ) : effectiveMode === 'posts' ? (
-          <PostList posts={visiblePosts} pubsById={pubsById} />
+          <>
+            {currentFeed && currentFeed.failed.length > 0 && (
+              <p className="feed-note" title={currentFeed.failed.map((p) => p.name).join(', ')}>
+                Couldn't load new posts from {currentFeed.failed.length === 1 ? currentFeed.failed[0]!.name : `${currentFeed.failed.length} publications`}.
+              </p>
+            )}
+            <PostList posts={visiblePosts} pubsById={pubsById} />
+          </>
         ) : (
           <PublicationList
             pubs={visiblePubs}
