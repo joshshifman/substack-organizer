@@ -56,7 +56,7 @@ a { color: inherit; }
   color: #fff;
   padding: 0 10px 22px;
 }
-.wordmark span { font-weight: 400; color: var(--rack-muted); }
+
 
 .nav-group { display: flex; flex-direction: column; gap: 2px; }
 .nav-heading {
@@ -253,6 +253,9 @@ a.post:hover { border-color: #aab4c6; transform: translateY(-1px); }
 .full-page-card { background: var(--card); border-radius: 16px; padding: 36px; max-width: 480px; }
 .full-page-card h1 { font: 700 26px/1.15 var(--display); letter-spacing: -0.02em; margin: 0 0 10px; }
 .full-page-card p { color: var(--muted); margin: 0 0 20px; }
+.full-page-card { max-width: 560px; }
+.notice-list { margin: 0 0 18px; padding-left: 18px; display: flex; flex-direction: column; gap: 10px; color: var(--muted); }
+.notice-list strong { color: var(--ink); font-weight: 600; }
 
 @media (max-width: 760px) {
   .app { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }

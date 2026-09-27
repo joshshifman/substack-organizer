@@ -20,8 +20,46 @@ export async function cachedSubscriptions(): Promise<Cached<Publication[]> | nul
 export async function refreshSubscriptions(): Promise<Cached<Publication[]>> {
   const entry = { fetchedAt: Date.now(), data: await fetchSubscriptions() };
   await browser.storage.local.set({ [SUBS_KEY]: entry });
+  await prunePosts(new Set(entry.data.map((p) => p.id))).catch((err) => console.warn('Could not prune cached posts', err));
   return entry;
 }
+
+const POSTS_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+
+/** Deletes cached posts for publications you've left, and any older than a week. */
+async function prunePosts(subscribed: Set<number>): Promise<void> {
+  const all = await browser.storage.local.get(null);
+  const now = Date.now();
+  const stale = Object.entries(all)
+    .filter(([key, value]) => {
+      if (!key.startsWith('posts:')) return false;
+      const entry = value as Cached<Post[]>;
+      return !subscribed.has(Number(key.slice(6))) || now - entry.fetchedAt > POSTS_MAX_AGE_MS;
+    })
+    .map(([key]) => key);
+  if (stale.length) await browser.storage.local.remove(stale);
+}
+
+/**
+ * Deletes everything cached from Substack (subscriptions and posts). Folders,
+ * pins and the first-run notice acknowledgement are kept.
+ */
+export async function clearSubstackCache(): Promise<void> {
+  const keys = Object.keys(await browser.storage.local.get(null)).filter((k) => k === SUBS_KEY || k.startsWith('posts:'));
+  await browser.storage.local.remove(keys);
+}
+
+// ── First-run notice ─────────────────────────────────────────────────────────
+// Nothing is requested from Substack until the user has read what the extension
+// reads and stores, and chosen to continue.
+
+const NOTICE_KEY = 'noticeAcceptedAt';
+
+export async function noticeAccepted(): Promise<boolean> {
+  return NOTICE_KEY in (await browser.storage.local.get(NOTICE_KEY));
+}
+
+export const acceptNotice = () => browser.storage.local.set({ [NOTICE_KEY]: Date.now() });
 
 export interface FeedResult {
   /** Newest first. */

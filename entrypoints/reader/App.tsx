@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { cachedSubscriptions, recentPosts, refreshSubscriptions, type FeedResult } from '@/lib/cache';
+import { acceptNotice, cachedSubscriptions, clearSubstackCache, noticeAccepted, recentPosts, refreshSubscriptions, type FeedResult } from '@/lib/cache';
+import { FULL_NAME, PRIVACY_URL } from '@/lib/brand';
 import { emptyLibrary, unsortedIds, type LibraryOp } from '@/lib/library';
 import { getLibraryDoc, mutateLibrary, watchLibraryDoc } from '@/lib/library-client';
 import type { LibraryDoc } from '@/lib/store';
@@ -28,6 +29,7 @@ type SubsState =
 
 export default function App() {
   const [subs, setSubs] = useState<SubsState>({ status: 'loading' });
+  const [notice, setNotice] = useState<'unknown' | 'show' | 'accepted'>('unknown');
   const [doc, setDoc] = useState<LibraryDoc | null>(null);
   const [libraryError, setLibraryError] = useState<string | null>(null);
   const [view, setView] = useState<View>(loadView);
@@ -83,7 +85,17 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    syncSubscriptions();
+    noticeAccepted().then((accepted) => setNotice(accepted ? 'accepted' : 'show'));
+  }, []);
+  useEffect(() => {
+    if (notice === 'accepted') syncSubscriptions();
+  }, [notice, syncSubscriptions]);
+
+  const clearCache = useCallback(async () => {
+    await clearSubstackCache();
+    setFeed(null);
+    setSubs({ status: 'loading' });
+    await syncSubscriptions();
   }, [syncSubscriptions]);
 
   useEffect(() => localStorage.setItem('view', JSON.stringify(view)), [view]);
@@ -171,6 +183,33 @@ export default function App() {
   const title =
     view.kind === 'pinned' ? 'Pinned' : view.kind === 'all' ? 'All subscriptions' : view.kind === 'unsorted' ? 'Unsorted' : folder?.name ?? '';
 
+  if (notice === 'unknown') return <FullPage title="Loading…" />;
+  if (notice === 'show') {
+    return (
+      <FullPage title={`Before ${FULL_NAME} loads your subscriptions`}>
+        <ul className="notice-list">
+          <li>
+            <strong>What it reads.</strong> Using your Substack login in this browser, it reads the list of publications you subscribe to
+            (including private subscriptions and whether each is paid) and their recent posts.
+          </li>
+          <li>
+            <strong>Where it's kept.</strong> Subscriptions and posts are cached in this browser. Your folders and pins are saved with
+            Chrome's sync storage, so Google syncs them to your other computers if Chrome Sync is on.
+          </li>
+          <li>
+            <strong>Where it goes.</strong> Nowhere else. The extension talks only to Substack; there are no other servers, analytics or ads.
+          </li>
+        </ul>
+        <p>
+          You can clear the cache from the sidebar at any time. Uninstalling the extension removes everything.{' '}
+          <a href={PRIVACY_URL} target="_blank" rel="noreferrer">Privacy policy</a>
+        </p>
+        <button className="button primary" onClick={() => acceptNotice().then(() => setNotice('accepted'))}>
+          Continue
+        </button>
+      </FullPage>
+    );
+  }
   if (subs.status === 'loading') return <FullPage title="Loading your subscriptions…" />;
   if (subs.status === 'signed-out') {
     return (
@@ -221,6 +260,7 @@ export default function App() {
         sync={doc}
         fetchedAt={subs.fetchedAt}
         onRefresh={syncSubscriptions}
+        onClearCache={clearCache}
       />
       <main className="main">
         <div className="column">

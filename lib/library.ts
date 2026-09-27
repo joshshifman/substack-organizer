@@ -97,7 +97,7 @@ export function parseLibrary(value: unknown): Library {
   const v = value as any;
   const pinned = uniqueIds(v?.pinned);
   if (!v || !Array.isArray(v.folders) || !pinned) {
-    throw new Error('This file is not a Substack Organizer export.');
+    throw new Error('This file is not a folders export from this extension.');
   }
   const seen = new Set<string>();
   const folders = v.folders.map((f: any): Folder => {

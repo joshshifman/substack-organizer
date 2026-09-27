@@ -2,6 +2,7 @@ import { useRef, useState, type CSSProperties, type DragEvent, type ReactNode } 
 import { newFolderId, parseLibrary, unsortedIds, type Folder, type Library, type LibraryOp } from '@/lib/library';
 import type { LibraryDoc } from '@/lib/store';
 import { thumb, type Publication } from '@/lib/substack';
+import { APP_NAME } from '@/lib/brand';
 import type { View } from './App';
 import { Icon, type IconName } from './icons';
 
@@ -18,9 +19,10 @@ interface Props {
   sync: LibraryDoc;
   fetchedAt: number;
   onRefresh: () => Promise<void>;
+  onClearCache: () => Promise<void>;
 }
 
-export function Sidebar({ library, pubs, pubsById, view, onView, mutate, sync, fetchedAt, onRefresh }: Props) {
+export function Sidebar({ library, pubs, pubsById, view, onView, mutate, sync, fetchedAt, onRefresh, onClearCache }: Props) {
   const [adding, setAdding] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
@@ -53,7 +55,7 @@ export function Sidebar({ library, pubs, pubsById, view, onView, mutate, sync, f
   return (
     <nav className="sidebar" aria-label="Folders">
       <div className="wordmark">
-        Substack <span>Organizer</span>
+        {APP_NAME}
       </div>
 
       <div className="nav-group">
@@ -125,6 +127,17 @@ export function Sidebar({ library, pubs, pubsById, view, onView, mutate, sync, f
         <div className="row">
           <button className="text-button" onClick={exportLibrary}>Export folders</button>
           <button className="text-button" onClick={() => fileInput.current?.click()}>Import</button>
+          <button
+            className="text-button"
+            title="Delete the subscriptions and posts cached from Substack. Folders and pins are kept."
+            onClick={() => {
+              if (confirm('Delete the subscriptions and posts cached from Substack? Your folders and pins are kept, and your subscriptions will reload.')) {
+                void onClearCache();
+              }
+            }}
+          >
+            Clear cache
+          </button>
           <input
             ref={fileInput}
             type="file"

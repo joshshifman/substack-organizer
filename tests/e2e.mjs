@@ -34,8 +34,9 @@ async function eventually(check, timeout = 5000) {
   }
 }
 
+let noticeShot = 0;
 async function launch({ signedIn, empty = false }) {
-  const calls = { posts: 0 };
+  const calls = { posts: 0, api: 0 };
   const context = await chromium.launchPersistentContext(mkdtempSync(join(tmpdir(), 'so-e2e-')), {
     channel: 'chromium',
     headless: true,
@@ -51,6 +52,7 @@ async function launch({ signedIn, empty = false }) {
     });
   });
   await context.route('https://substack.com/api/v1/**', (route) => {
+    calls.api++;
     const url = new URL(route.request().url());
     if (!signedIn) return route.fulfill({ status: 401, json: { errors: [{ msg: 'Please sign in' }] } });
     if (url.pathname === '/api/v1/user/profile/self') return route.fulfill({ json: empty ? { ...profileSelf, subscriptions: [] } : profileSelf });
@@ -67,6 +69,12 @@ async function launch({ signedIn, empty = false }) {
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto(`chrome-extension://${extensionId}/reader.html`);
+  // First run: nothing is requested from Substack until the notice is accepted.
+  await page.getByRole('button', { name: 'Continue' }).waitFor();
+  await page.waitForTimeout(200);
+  assert.equal(calls.api, 0, 'requested Substack before the first-run notice was accepted');
+  if (!noticeShot++) await page.screenshot({ path: join(shots, '0-first-run.png') });
+  await page.getByRole('button', { name: 'Continue' }).click();
   return { context, page, errors, calls };
 }
 
@@ -81,7 +89,7 @@ const pubsWithPosts = subscriptions.publications
   await page.getByRole('heading', { name: 'Sign in to Substack to see your subscriptions' }).waitFor();
   await page.screenshot({ path: join(shots, '1-signed-out.png') });
   await context.close();
-  console.log('✓ signed-out screen');
+  console.log('✓ first-run notice shown before any Substack request; signed-out screen');
 }
 
 // ── Signed in, no subscriptions ──────────────────────────────────────────────
@@ -255,6 +263,19 @@ const pubsWithPosts = subscriptions.publications
   await page.waitForTimeout(300);
   assert.equal(calls.posts, afterPinned);
   console.log('✓ a manual refresh fetches once; switching modes and views afterwards uses the cache');
+
+  // Clearing the cache deletes Substack data, keeps folders, and reloads subscriptions.
+  await page.evaluate(() => chrome.storage.local.set({ 'posts:424242': { fetchedAt: 0, data: [] } }));
+  page.once('dialog', (d) => d.accept());
+  await page.getByRole('button', { name: 'Clear cache' }).click();
+  await page.locator('.nav-item', { hasText: 'All subscriptions' }).waitFor();
+  await eventually(async () => {
+    const local = await page.evaluate(() => chrome.storage.local.get(null));
+    assert.ok(!('posts:424242' in local), 'cached posts survived Clear cache');
+    assert.ok('subscriptions' in local && 'libraryDoc' in local && 'noticeAcceptedAt' in local);
+  });
+  assert.deepEqual(await page.locator('.folder-slot .nav-label').allInnerTexts(), ['Economics']);
+  console.log('✓ Clear cache deletes Substack data and keeps folders');
 
   assert.deepEqual(errors, [], `page errors: ${errors.join('\n')}`);
   await context.close();

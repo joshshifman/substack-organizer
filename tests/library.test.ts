@@ -54,7 +54,7 @@ describe('parseLibrary (imports)', () => {
   });
 
   it('rejects files that are not exports', () => {
-    expect(() => parseLibrary({ folders: 'nope', pinned: [] })).toThrow(/not a Substack Organizer export/);
+    expect(() => parseLibrary({ folders: 'nope', pinned: [] })).toThrow(/not a folders export/);
     expect(() => parseLibrary({ folders: [{ name: 'X', pubIds: ['a'] }], pinned: [] })).toThrow(/folder/);
     expect(() => parseLibrary({ folders: [{ name: 'X', pubIds: [-1] }], pinned: [] })).toThrow(/folder/);
   });
