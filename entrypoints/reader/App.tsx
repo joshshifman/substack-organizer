@@ -201,7 +201,7 @@ export default function App() {
           </li>
         </ul>
         <p>
-          You can clear the cache from the sidebar at any time. Uninstalling the extension removes everything.{' '}
+          You can clear the cache from the sidebar at any time, and uninstalling the extension deletes it.{' '}
           <a href={PRIVACY_URL} target="_blank" rel="noreferrer">Privacy policy</a>
         </p>
         <button className="button primary" onClick={() => acceptNotice().then(() => setNotice('accepted'))}>
